@@ -9,12 +9,20 @@ import {
   Settings,
   Terminal,
   MessageSquare,
+  Send,
 } from 'lucide-react';
 
 interface CodeEditorProps {
   initialCode?: string;
   language?: string;
   theme?: string;
+}
+
+interface Message {
+  id: string;
+  text: string;
+  type: 'user' | 'assistant';
+  timestamp: Date;
 }
 
 const CodeEditor: FC<CodeEditorProps> = ({
@@ -26,6 +34,16 @@ const CodeEditor: FC<CodeEditorProps> = ({
   const [showLeftPanel, setShowLeftPanel] = useState(true);
   const [showRightPanel, setShowRightPanel] = useState(true);
   const [isRunning, setIsRunning] = useState(false);
+  const [terminalOutput, setTerminalOutput] = useState<string[]>([]);
+  const [messages, setMessages] = useState<Message[]>([
+    {
+      id: '1',
+      text: 'How can I help you with your code today?',
+      type: 'assistant',
+      timestamp: new Date(),
+    },
+  ]);
+  const [userInput, setUserInput] = useState('');
 
   const handleEditorChange = (value: string | undefined) => {
     if (value !== undefined) {
@@ -36,11 +54,40 @@ const CodeEditor: FC<CodeEditorProps> = ({
   const handleRun = async () => {
     setIsRunning(true);
     try {
-      // TODO: Implement code execution logic
-      await new Promise(resolve => setTimeout(resolve, 2000)); // Simulate execution
+      // Simulate command execution
+      setTerminalOutput(prev => [...prev, '> Running code...']);
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      setTerminalOutput(prev => [...prev, '✓ Code executed successfully']);
+    } catch (error) {
+      setTerminalOutput(prev => [...prev, `Error: ${error}`]);
     } finally {
       setIsRunning(false);
     }
+  };
+
+  const handleSendMessage = async () => {
+    if (!userInput.trim()) return;
+
+    const newMessage: Message = {
+      id: Date.now().toString(),
+      text: userInput,
+      type: 'user',
+      timestamp: new Date(),
+    };
+
+    setMessages(prev => [...prev, newMessage]);
+    setUserInput('');
+
+    // Simulate AI response
+    setTimeout(() => {
+      const response: Message = {
+        id: (Date.now() + 1).toString(),
+        text: 'I understand you need help with the code. Could you please provide more specific details about what you\'d like me to assist with?',
+        type: 'assistant',
+        timestamp: new Date(),
+      };
+      setMessages(prev => [...prev, response]);
+    }, 1000);
   };
 
   return (
@@ -139,12 +186,19 @@ const CodeEditor: FC<CodeEditorProps> = ({
               <Terminal className="w-4 h-4" />
               <span>Terminal</span>
             </div>
-            <button className="text-gray-400 hover:text-white">
+            <button
+              onClick={() => setTerminalOutput([])}
+              className="text-gray-400 hover:text-white"
+            >
               <Settings className="w-4 h-4" />
             </button>
           </div>
-          <div className="p-4 font-mono text-sm text-gray-300">
-            {/* Add terminal output */}
+          <div className="p-4 font-mono text-sm text-gray-300 h-full overflow-auto">
+            {terminalOutput.map((line, index) => (
+              <div key={index} className="mb-1">
+                {line}
+              </div>
+            ))}
           </div>
         </div>
       </div>
@@ -155,10 +209,10 @@ const CodeEditor: FC<CodeEditorProps> = ({
         animate={{ width: showRightPanel ? 300 : 0 }}
         className={`bg-gray-800 border-l border-gray-700 ${
           showRightPanel ? 'block' : 'hidden'
-        }`}
+        } flex flex-col`}
       >
-        <div className="p-4">
-          <div className="flex items-center justify-between mb-4">
+        <div className="flex-1 flex flex-col">
+          <div className="flex items-center justify-between p-4 border-b border-gray-700">
             <h3 className="text-white font-medium">AI Assistant</h3>
             <button
               onClick={() => setShowRightPanel(false)}
@@ -167,18 +221,64 @@ const CodeEditor: FC<CodeEditorProps> = ({
               <PanelRightClose className="w-5 h-5" />
             </button>
           </div>
-          <div className="space-y-4">
-            <div className="flex items-start space-x-3">
-              <div className="p-2 bg-indigo-600 rounded-lg">
-                <MessageSquare className="w-4 h-4" />
+
+          <div className="flex-1 overflow-auto p-4 space-y-4">
+            {messages.map((message) => (
+              <div
+                key={message.id}
+                className={`flex items-start space-x-3 ${
+                  message.type === 'user' ? 'flex-row-reverse space-x-reverse' : ''
+                }`}
+              >
+                <div
+                  className={`p-2 rounded-lg ${
+                    message.type === 'assistant'
+                      ? 'bg-indigo-600'
+                      : 'bg-gray-700'
+                  }`}
+                >
+                  <MessageSquare className="w-4 h-4" />
+                </div>
+                <div
+                  className={`flex-1 ${
+                    message.type === 'user' ? 'text-right' : ''
+                  }`}
+                >
+                  <p className="text-sm text-white">{message.text}</p>
+                  <span className="text-xs text-gray-500">
+                    {message.timestamp.toLocaleTimeString()}
+                  </span>
+                </div>
               </div>
-              <div>
-                <p className="text-sm text-white">
-                  How can I help you with your code today?
-                </p>
-              </div>
+            ))}
+          </div>
+
+          <div className="p-4 border-t border-gray-700">
+            <div className="relative">
+              <input
+                type="text"
+                value={userInput}
+                onChange={(e) => setUserInput(e.target.value)}
+                onKeyPress={(e) => {
+                  if (e.key === 'Enter') {
+                    handleSendMessage();
+                  }
+                }}
+                placeholder="Type your message..."
+                className="w-full p-2 pr-10 bg-gray-700 text-white rounded-lg border border-gray-600 focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+              />
+              <button
+                onClick={handleSendMessage}
+                disabled={!userInput.trim()}
+                className={`absolute right-2 top-1/2 transform -translate-y-1/2 p-1 rounded-full ${
+                  !userInput.trim()
+                    ? 'text-gray-500'
+                    : 'text-indigo-500 hover:text-indigo-400'
+                }`}
+              >
+                <Send className="w-4 h-4" />
+              </button>
             </div>
-            {/* Add more AI conversation messages */}
           </div>
         </div>
       </motion.div>
