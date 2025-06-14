@@ -5,12 +5,15 @@ import { motion } from 'framer-motion';
 import { Project } from '@/types/project';
 import { StarIcon, ArrowPathIcon, ShareIcon, ArchiveBoxIcon } from '@heroicons/react/24/outline';
 import { formatDistanceToNow } from 'date-fns';
+import { useRouter } from 'next/navigation';
 
 interface ProjectCardProps {
   project: Project;
 }
 
 const ProjectCard: FC<ProjectCardProps> = ({ project }) => {
+  const router = useRouter();
+  
   const getBuildHealthColor = (health: Project['buildHealth']) => {
     switch (health) {
       case 'healthy':
@@ -24,10 +27,26 @@ const ProjectCard: FC<ProjectCardProps> = ({ project }) => {
     }
   };
 
+  const handleCardClick = () => {
+    router.push(`/ide?projectId=${project.id}`);
+  };
+  
+  const handleFavoriteToggle = (e: React.MouseEvent) => {
+    e.stopPropagation(); // Prevent card click
+    // Add favorite toggle functionality here
+    console.log('Toggle favorite for project:', project.id);
+  };
+
+  const handleActionClick = (action: string, e: React.MouseEvent) => {
+    e.stopPropagation(); // Prevent card click
+    console.log(`Action ${action} for project:`, project.id);
+  };
+
   return (
     <motion.div
       whileHover={{ scale: 1.02 }}
-      className="relative group bg-gray-800 rounded-lg overflow-hidden shadow-lg border border-gray-700"
+      className="relative group bg-gray-800 rounded-lg overflow-hidden shadow-lg border border-gray-700 cursor-pointer"
+      onClick={handleCardClick}
     >
       {/* Project thumbnail */}
       <div className="h-48 bg-gray-900">
@@ -55,6 +74,7 @@ const ProjectCard: FC<ProjectCardProps> = ({ project }) => {
             className={`text-gray-400 hover:text-yellow-500 transition-colors ${
               project.favorite ? 'text-yellow-500' : ''
             }`}
+            onClick={handleFavoriteToggle}
           >
             <StarIcon className="w-5 h-5" />
           </button>
@@ -101,13 +121,22 @@ const ProjectCard: FC<ProjectCardProps> = ({ project }) => {
       {/* Quick actions */}
       <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
         <div className="flex space-x-1">
-          <button className="p-1 rounded-full bg-gray-800/80 text-gray-300 hover:text-white">
+          <button 
+            className="p-1 rounded-full bg-gray-800/80 text-gray-300 hover:text-white"
+            onClick={(e) => handleActionClick('share', e)}
+          >
             <ShareIcon className="w-4 h-4" />
           </button>
-          <button className="p-1 rounded-full bg-gray-800/80 text-gray-300 hover:text-white">
+          <button 
+            className="p-1 rounded-full bg-gray-800/80 text-gray-300 hover:text-white"
+            onClick={(e) => handleActionClick('refresh', e)}
+          >
             <ArrowPathIcon className="w-4 h-4" />
           </button>
-          <button className="p-1 rounded-full bg-gray-800/80 text-gray-300 hover:text-white">
+          <button 
+            className="p-1 rounded-full bg-gray-800/80 text-gray-300 hover:text-white"
+            onClick={(e) => handleActionClick('archive', e)}
+          >
             <ArchiveBoxIcon className="w-4 h-4" />
           </button>
         </div>

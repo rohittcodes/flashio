@@ -1,6 +1,6 @@
 'use client';
 
-import { signIn } from "next-auth/react";
+import { signIn } from "@/lib/auth";
 import { Button } from "../ui/button";
 import { useState } from "react";
 
@@ -10,7 +10,7 @@ export default function Login() {
   const handleLogin = async () => {
     try {
       setIsLoading(true);
-      await signIn("github", { callbackUrl: '/dashboard' });
+      await signIn("github", { redirectTo: '/dashboard' });
     } catch (error) {
       console.error('Login failed:', error);
     } finally {

@@ -31,7 +31,7 @@ export default function Home() {
           transition={{ duration: 0.8, delay: 0.2 }}
           className="text-5xl md:text-6xl font-bold mb-6 bg-clip-text text-transparent bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500"
         >
-          Flashio Code Editor
+          Flash.io 
         </motion.h1>
 
         <motion.p

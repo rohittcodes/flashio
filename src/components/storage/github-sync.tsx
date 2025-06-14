@@ -13,8 +13,8 @@ export function GitHubSync({ projectId, onSyncComplete }: GitHubSyncProps) {
   const [isLoading, setIsLoading] = useState(false)
   const [syncStatus, setSyncStatus] = useState<'idle' | 'syncing' | 'success' | 'error'>('idle')
   const [repoUrl, setRepoUrl] = useState<string>('')
-  const [repoName, setRepoName] = useState(`flashio-project-${projectId}`)
-  const [description, setDescription] = useState('Project created with FlashIO')
+  const [repoName, setRepoName] = useState(`flash-io-project-${projectId}`)
+  const [description, setDescription] = useState('Project created with Flash.io')
   const [isPrivate, setIsPrivate] = useState(true)
   const [error, setError] = useState<string>('')
   const [syncDetails, setSyncDetails] = useState<{

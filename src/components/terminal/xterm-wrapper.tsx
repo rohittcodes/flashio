@@ -76,6 +76,9 @@ export default function XTermWrapper({
     // Fit terminal to container
     fitAddon.current.fit()
 
+    // Display welcome message
+    displayWelcomeMessage(terminal.current)
+
     // Initialize terminal session
     initializeTerminal()
 
@@ -99,6 +102,29 @@ export default function XTermWrapper({
       }
     }
   }, [sessionId, webContainerId, projectId])
+
+  const displayWelcomeMessage = (term: Terminal) => {
+    const flashIoArt = [
+      "▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄",
+      "█  ▄████▄   █████▄  █████▄ ▄█████▄ █ █    █      ▄█████▄     █",
+      "█ █▀    ▀█  █    █  █    █ █▀    █ █ █    █      █     █     █",
+      "█ █      █  █    █  █    █ █        █    █       █     █     █",
+      "█ █▄    ▄█  █    █  █    █ █▄    █  █   █        █     █     █",
+      "█  ▀████▀   █████▀  █████▀ ▀█████▀  █  █          ▀███▀      █",
+      "▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀"
+    ];
+
+    term.write('\r\n');
+    
+    // Write ASCII art in blue
+    flashIoArt.forEach(line => {
+      term.write('\x1b[34m' + line + '\x1b[0m\r\n');
+    });
+    
+    term.write('\r\n');
+    term.write('\x1b[32m✓ Flash.io Terminal Ready\x1b[0m\r\n');
+    term.write('\x1b[90mConnecting to project environment...\x1b[0m\r\n\r\n');
+  };
 
   const initializeTerminal = async () => {
     if (!terminal.current) return

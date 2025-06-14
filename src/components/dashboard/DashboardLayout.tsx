@@ -30,7 +30,7 @@ const DashboardLayout: FC<DashboardLayoutProps> = ({ children }) => {
         className="fixed inset-y-0 left-0 z-50 w-64 bg-gray-800 border-r border-gray-700 shadow-xl"
       >
         <div className="flex items-center justify-between h-16 px-4 border-b border-gray-700">
-          <span className="text-xl font-bold text-white">Flashio</span>
+          <span className="text-xl font-bold text-white">Flash.io</span>
           <button
             onClick={() => setSidebarOpen(false)}
             className="p-1 text-gray-400 hover:text-white"

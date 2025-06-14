@@ -1,7 +1,5 @@
 'use client';
 
-'use client';
-
 import { FC, useState, useEffect } from 'react';
 import { Editor } from '@monaco-editor/react';
 import { motion } from 'framer-motion';

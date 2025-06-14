@@ -6,7 +6,8 @@ import { TerminalComponent } from '@/components/terminal/terminal'
 import { WebContainerProcess } from '@webcontainer/api'
 import { Button } from '@/components/ui/button'
 import { GitHubSync } from '@/components/storage/github-sync'
-import { Settings, Cloud, Database, Save, Github } from 'lucide-react'
+import { Settings, Cloud, Database, Save, Github, RefreshCw } from 'lucide-react'
+import { webContainerManager } from '@/lib/webcontainer-manager'
 
 interface IDEProps {
   projectId: string
@@ -36,11 +37,27 @@ export function IDE({ projectId, initialFiles = [], className = '' }: IDEProps) 
     local: true
   })
   const [isSaving, setIsSaving] = useState(false)
-
+  const [retryCount, setRetryCount] = useState(0)
   // Initialize WebContainer and load initial files
   useEffect(() => {
     initializeIDE()
+    
+    // Clean up function to handle component unmount
+    return () => {
+      // We don't tear down WebContainer here as it might be needed by other components
+      // Explicit teardown would be handled by a "Close Project" action
+    }
   }, [projectId])
+  
+  const handleRetry = () => {
+    // Reset the WebContainer manager to force a fresh start
+    if (typeof window !== 'undefined') {
+      webContainerManager.reset();
+    }
+    setError(null);
+    setRetryCount(prev => prev + 1);
+    initializeIDE();
+  }
 
   const initializeIDE = async () => {
     try {
@@ -51,7 +68,7 @@ export function IDE({ projectId, initialFiles = [], className = '' }: IDEProps) 
       const bootstrapCheck = await fetch(`/api/projects/bootstrap?projectId=${projectId}`)
       if (bootstrapCheck.ok) {
         const { needsBootstrap } = await bootstrapCheck.json()
-          if (needsBootstrap) {
+        if (needsBootstrap) {
           console.log('🚀 Project needs bootstrapping, creating default files...')
           
           // Bootstrap the project with default files
@@ -82,7 +99,8 @@ export function IDE({ projectId, initialFiles = [], className = '' }: IDEProps) 
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-        },        body: JSON.stringify({
+        },
+        body: JSON.stringify({
           projectId,
           options: {
             coep: 'require-corp' as const,
@@ -96,20 +114,67 @@ export function IDE({ projectId, initialFiles = [], className = '' }: IDEProps) 
       }
 
       const { instanceId } = await containerResponse.json()
-      setWebContainerId(instanceId)      // Boot WebContainer client-side
+      setWebContainerId(instanceId)
+      
+      // Boot WebContainer client-side using our manager
       if (typeof window !== 'undefined') {
-        const { WebContainer } = await import('@webcontainer/api')
-        const webContainer = await WebContainer.boot({
-          coep: 'require-corp',
-          workdirName: `project-${projectId}`,
-        })        // Store the WebContainer instance globally for access by other components
-        ;(window as any).webContainerInstance = webContainer
-        ;(window as any).webContainerInstanceId = instanceId
-
-        // Load project files into WebContainer from our database
-        await loadProjectFilesIntoWebContainer(webContainer, projectId)
-
-        setIsWebContainerReady(true)
+        try {
+          // First, check if we already have a WebContainer instance globally
+          let webContainer = (window as any).webContainerInstance;
+          
+          if (webContainer) {
+            console.log('📌 Using existing global WebContainer instance');
+          } else {
+            // Try to get a WebContainer instance through our manager
+            console.log('🔄 Getting WebContainer instance via manager...');
+            try {
+              webContainer = await webContainerManager.getWebContainer(projectId, {
+                coep: 'require-corp',
+              });
+              console.log('✅ WebContainer instance created through manager');
+            } catch (error) {
+              console.error('⚠️ Failed to get WebContainer through manager:', error);
+              
+              // If we're hitting the "Only a single WebContainer" error, it means
+              // something else in the app is already creating a WebContainer
+              if (error instanceof Error && error.message.includes('Only a single WebContainer instance can be booted')) {
+                console.log('⚠️ Another WebContainer exists but is not accessible. Trying to recover...');
+                
+                // Wait for any potential initialization to complete
+                await new Promise(resolve => setTimeout(resolve, 1000));
+                
+                // Check again for global instance
+                webContainer = (window as any).webContainerInstance;
+                
+                if (!webContainer) {
+                  throw new Error('Cannot access existing WebContainer instance. Please refresh the page.');
+                } else {
+                  console.log('✅ Recovered existing WebContainer instance');
+                }
+              } else {
+                throw error; // Re-throw other errors
+              }
+            }
+          }
+          
+          // Make sure the WebContainer instance is accessible globally
+          (window as any).webContainerInstance = webContainer;
+          (window as any).webContainerInstanceId = instanceId;
+          
+          // Load project files into WebContainer
+          await loadProjectFilesIntoWebContainer(webContainer, projectId);
+          
+          setIsWebContainerReady(true);
+        } catch (error) {
+          console.error('❌ Failed to initialize WebContainer:', error);
+          setError(`WebContainer initialization failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
+          
+          if (error instanceof Error && error.message.includes('Only a single WebContainer instance can be booted')) {
+            setError('Only one WebContainer instance can run at a time. Please close all other IDE tabs and refresh the page.');
+          } else if (error instanceof Error && error.message.includes('Cannot access existing WebContainer')) {
+            setError('A WebContainer instance exists but cannot be accessed. Please refresh the page to reset.');
+          }
+        }
       }
 
       // Load initial files
@@ -121,9 +186,7 @@ export function IDE({ projectId, initialFiles = [], className = '' }: IDEProps) 
         }))
         setOpenFiles(files)
         setActiveFile(files[0]?.path || null)
-      }
-
-      setIsWebContainerReady(true)
+      }      setIsWebContainerReady(true)
     } catch (error) {
       console.error('Failed to initialize IDE:', error)
       setError('Failed to initialize development environment')
@@ -429,14 +492,25 @@ export function IDE({ projectId, initialFiles = [], className = '' }: IDEProps) 
       </div>
     )
   }
-
   if (error) {
     return (
       <div className={`ide-container ${className} flex items-center justify-center min-h-screen`}>
-        <div className="text-center">
-          <div className="text-red-500 text-xl mb-4">⚠️ Error</div>
-          <p className="text-gray-600 mb-4">{error}</p>
-          <Button onClick={initializeIDE}>Retry</Button>
+        <div className="text-center max-w-lg p-6 bg-gray-800 rounded-lg shadow-lg">
+          <div className="text-red-500 text-xl mb-4 flex items-center justify-center gap-2">
+            <span className="text-3xl">⚠️</span> Error
+          </div>
+          <p className="text-gray-300 mb-6">{error}</p>
+          <div className="flex justify-center gap-3">
+            <Button onClick={handleRetry} className="flex items-center gap-2">
+              <RefreshCw className="w-4 h-4" /> Retry
+            </Button>
+            <Button 
+              variant="outline" 
+              onClick={() => window.location.href = '/dashboard'}
+            >
+              Return to Dashboard
+            </Button>
+          </div>
         </div>
       </div>
     )

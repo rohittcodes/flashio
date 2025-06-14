@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
-import { SessionProvider } from "next-auth/react";
+import { auth } from "@/lib/auth";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -13,7 +13,8 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
-export const metadata: Metadata = {  title: "Flashio - AI-Powered Code Editor",
+export const metadata: Metadata = {
+  title: "Flash.io - AI-Powered Code Editor",
   description: "Experience the future of coding with AI-powered assistance, real-time collaboration, and intelligent code generation.",
   icons: {
     icon: '/logo.svg',
@@ -24,15 +25,14 @@ export default function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
-}>) {  return (
+}>) {
+  return (
     <html lang="en">
-      <SessionProvider>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-          {children}
+        {children}
       </body>
-      </SessionProvider>
     </html>
   );
 }
