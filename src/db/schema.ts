@@ -5,17 +5,12 @@ import {
   text,
   primaryKey,
   integer,
+  uuid,
+  json,
 } from "drizzle-orm/pg-core"
-import { drizzle } from "drizzle-orm/neon-http"
-import { neon } from "@neondatabase/serverless"
 import type { AdapterAccountType } from "next-auth/adapters"
-
-const connectionString = process.env.DATABASE_URL!
-const sql = neon(connectionString)
-
-export const db = drizzle(sql)
    
-  export const users = pgTable("user", {
+export const users = pgTable("user", {
     id: text("id")
       .primaryKey()
       .$defaultFn(() => crypto.randomUUID()),
@@ -23,7 +18,37 @@ export const db = drizzle(sql)
     email: text("email").unique(),
     emailVerified: timestamp("emailVerified", { mode: "date" }),
     image: text("image"),
+    createdAt: timestamp("createdAt", { mode: "date" }).$defaultFn(() => new Date()),
+    updatedAt: timestamp("updatedAt", { mode: "date" }).$defaultFn(() => new Date()),
   })
+
+export const projects = pgTable("projects", {
+    id: uuid("id").primaryKey().$defaultFn(() => crypto.randomUUID()),
+    name: text("name").notNull(),
+    description: text("description"),
+    userId: text("userId").notNull().references(() => users.id, { onDelete: "cascade" }),
+    createdAt: timestamp("createdAt", { mode: "date" }).$defaultFn(() => new Date()),
+    updatedAt: timestamp("updatedAt", { mode: "date" }).$defaultFn(() => new Date()),
+})
+
+export const webcontainer_instances = pgTable("webcontainer_instances", {
+    id: uuid("id").primaryKey().$defaultFn(() => crypto.randomUUID()),
+    projectId: uuid("projectId").notNull().references(() => projects.id, { onDelete: "cascade" }),
+    status: text("status").notNull(),
+    metadata: json("metadata"),
+    createdAt: timestamp("createdAt", { mode: "date" }).$defaultFn(() => new Date()),
+    updatedAt: timestamp("updatedAt", { mode: "date" }).$defaultFn(() => new Date()),
+})
+
+export const terminal_sessions = pgTable("terminal_sessions", {
+    id: uuid("id").primaryKey().$defaultFn(() => crypto.randomUUID()),
+    instanceId: uuid("instanceId").notNull().references(() => webcontainer_instances.id, { onDelete: "cascade" }),
+    command: text("command").notNull(),
+    output: text("output"),
+    status: text("status").notNull(),
+    createdAt: timestamp("createdAt", { mode: "date" }).$defaultFn(() => new Date()),
+    updatedAt: timestamp("updatedAt", { mode: "date" }).$defaultFn(() => new Date()),
+})
    
   export const accounts = pgTable(
     "account",
