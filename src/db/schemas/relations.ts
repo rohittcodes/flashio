@@ -1,7 +1,7 @@
 import { relations } from "drizzle-orm"
 
 // Import all tables
-import { users, accounts, sessions, verificationTokens, authenticators } from "./auth"
+import { users, accounts, sessions, verificationTokens, authenticators } from  "../schema"
 import { projects, projectFiles, buildTasks, projectTemplates } from "./projects"
 import { projectCollaborators, collaborationSessions, collaborativeCursors, comments } from "./collaboration"
 import { webContainerInstances, terminalSessions, fileWatchers, fileWatcherEvents } from "./webcontainer"

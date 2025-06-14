@@ -9,7 +9,7 @@ import {
   index,
 } from "drizzle-orm/pg-core"
 import type { PgTableWithColumns } from "drizzle-orm/pg-core"
-import { users } from "./auth"
+import { users } from "../schema"
 import { projectStatusEnum, projectVisibilityEnum, buildTaskStatusEnum, buildTaskTypeEnum } from "./enums"
 
 // Core Project Tables

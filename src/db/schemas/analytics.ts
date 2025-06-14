@@ -7,7 +7,7 @@ import {
   varchar,
   index,
 } from "drizzle-orm/pg-core"
-import { users } from "./auth"
+import { users } from "../schema"
 import { projects } from "./projects"
 import { activityTypeEnum } from "./enums"
 
