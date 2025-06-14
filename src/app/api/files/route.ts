@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { auth } from '@/lib/auth'
 import { db } from '@/db/drizzle'
 import { projectFiles } from '@/db/schemas'
-import { eq, and } from 'drizzle-orm'
+import { eq, and, sql } from 'drizzle-orm'
 import { FileStorageService } from '@/lib/file-storage'
 import { createHash } from 'crypto'
 
@@ -11,11 +11,33 @@ export async function GET(request: NextRequest) {
     const session = await auth()
     if (!session?.user?.id) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-    }
-
-    const { searchParams } = new URL(request.url)
+    }    const { searchParams } = new URL(request.url)
     const fileId = searchParams.get('fileId')
-    const projectId = searchParams.get('projectId')
+    const projectId = searchParams.get('projectId')    // If only projectId is provided, return all files for the project
+    if (projectId && !fileId) {
+      try {        const files = await db
+          .select({
+            id: projectFiles.id,
+            path: projectFiles.path,
+            language: projectFiles.language,
+            size: projectFiles.size,
+            mimeType: projectFiles.mimeType,
+            isDirectory: projectFiles.isDirectory,
+            isBinary: projectFiles.isBinary,
+            createdAt: projectFiles.createdAt,
+            updatedAt: projectFiles.updatedAt
+          })
+          .from(projectFiles)
+          .where(eq(projectFiles.projectId, projectId))
+          .orderBy(projectFiles.path)
+
+        console.log(`Found ${files.length} files for project ${projectId}`)
+        return NextResponse.json(files)
+      } catch (error) {
+        console.error('Failed to fetch project files:', error)
+        return NextResponse.json({ error: 'Failed to fetch project files' }, { status: 500 })
+      }
+    }
 
     if (!fileId) {
       return NextResponse.json({ error: 'Missing fileId' }, { status: 400 })
@@ -32,21 +54,8 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'File not found' }, { status: 404 })
     }
 
-    const fileRecord = file[0]
-
-    // Get file content based on storage type
-    let content = ''
-    switch (fileRecord.storageType) {
-      case 'filesystem':
-        if (fileRecord.storageKey) {
-          content = await FileStorageService.getFile(fileRecord.storageKey)
-        }
-        break
-      case 'database':
-      default:
-        content = fileRecord.content || ''
-        break
-    }
+    const fileRecord = file[0]    // Get file content (simplified for existing schema)
+    const content = fileRecord.content || ''
 
     return NextResponse.json({
       id: fileRecord.id,
@@ -57,7 +66,6 @@ export async function GET(request: NextRequest) {
       mimeType: fileRecord.mimeType,
       isDirectory: fileRecord.isDirectory,
       isBinary: fileRecord.isBinary,
-      storageType: fileRecord.storageType,
       updatedAt: fileRecord.updatedAt
     })
   } catch (error) {
@@ -84,51 +92,44 @@ export async function POST(request: NextRequest) {
 
     // Calculate file size and checksum
     const size = Buffer.byteLength(content || '', 'utf-8')
-    const checksum = createHash('sha256').update(content || '').digest('hex')
-
-    // Determine storage strategy based on file size
+    const checksum = createHash('sha256').update(content || '').digest('hex')    // Determine storage strategy based on file size
     const maxDbSize = 100 * 1024 // 100KB
     const useExternalStorage = size > maxDbSize
-
-    let storageKey = null
-    let storageType = 'database'
-    let fileContent = content
-
-    if (useExternalStorage && !isDirectory) {
-      // Store in filesystem
-      const { storageKey: key } = await FileStorageService.storeFile(
-        projectId,
-        path,
-        content || ''
+    
+    // Create file record using raw SQL to avoid schema issues
+    const fileId = crypto.randomUUID()
+    const now = new Date()
+    const isBinary = mimeType?.startsWith('application/') || mimeType?.startsWith('image/') || false
+      await db.execute(sql`
+      INSERT INTO project_files (
+        id, "projectId", path, content, language, "mimeType", size, checksum, 
+        "isDirectory", "isBinary", "lastModifiedBy", "createdAt", "updatedAt"
+      ) VALUES (
+        ${fileId}, ${projectId}, ${path}, ${content || ''}, ${language || null}, ${mimeType || null}, 
+        ${size}, ${checksum}, ${isDirectory}, ${isBinary}, 
+        ${session.user.id}, ${now}, ${now}
       )
-      storageKey = key
-      storageType = 'filesystem'
-      fileContent = '' // Don't store in DB if using external storage
-    }
-
-    // Create file record
-    const [fileRecord] = await db.insert(projectFiles).values({
+    `)
+      const fileRecord = {
+      id: fileId,
       projectId,
       path,
-      content: fileContent,
-      storageKey,
-      storageType,
+      content: content || '',
       language,
       mimeType,
       size,
       checksum,
       isDirectory,
-      isBinary: mimeType?.startsWith('application/') || mimeType?.startsWith('image/'),
+      isBinary,
       lastModifiedBy: session.user.id,
-      createdAt: new Date(),
-      updatedAt: new Date()
-    }).returning()
+      createdAt: now,
+      updatedAt: now
+    }
 
     return NextResponse.json({
       id: fileRecord.id,
       path: fileRecord.path,
       size: fileRecord.size,
-      storageType: fileRecord.storageType,
       message: 'File created successfully'
     })
   } catch (error) {
@@ -161,40 +162,21 @@ export async function PUT(request: NextRequest) {
       return NextResponse.json({ error: 'File not found' }, { status: 404 })
     }
 
-    const file = existingFile[0]
-
-    // Calculate new size and checksum
+    const file = existingFile[0]    // Calculate new size and checksum
     const size = Buffer.byteLength(content || '', 'utf-8')
     const checksum = createHash('sha256').update(content || '').digest('hex')
 
-    // Update content based on storage type
-    if (file.storageType === 'filesystem' && file.storageKey) {
-      // Update external file
-      await FileStorageService.updateFile(file.storageKey, content || '')
-      
-      // Update database metadata only
-      await db
-        .update(projectFiles)
-        .set({
-          size,
-          checksum,
-          lastModifiedBy: session.user.id,
-          updatedAt: new Date()
-        })
-        .where(eq(projectFiles.id, fileId))
-    } else {
-      // Update database content
-      await db
-        .update(projectFiles)
-        .set({
-          content,
-          size,
-          checksum,
-          lastModifiedBy: session.user.id,
-          updatedAt: new Date()
-        })
-        .where(eq(projectFiles.id, fileId))
-    }
+    // Update database content (simplified for existing schema)
+    await db
+      .update(projectFiles)
+      .set({
+        content,
+        size,
+        checksum,
+        lastModifiedBy: session.user.id,
+        updatedAt: new Date()
+      })
+      .where(eq(projectFiles.id, fileId))
 
     return NextResponse.json({
       id: fileId,
@@ -230,16 +212,7 @@ export async function DELETE(request: NextRequest) {
 
     if (file.length === 0) {
       return NextResponse.json({ error: 'File not found' }, { status: 404 })
-    }
-
-    const fileRecord = file[0]
-
-    // Delete external file if exists
-    if (fileRecord.storageType === 'filesystem' && fileRecord.storageKey) {
-      await FileStorageService.deleteFile(fileRecord.storageKey)
-    }
-
-    // Delete database record
+    }    // Delete database record (simplified for existing schema)
     await db.delete(projectFiles).where(eq(projectFiles.id, fileId))
 
     return NextResponse.json({

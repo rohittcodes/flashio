@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { Button } from '@/components/ui/button'
+import { Github, CheckCircle, XCircle, Loader2 } from 'lucide-react'
 
 interface GitHubSyncProps {
   projectId: string
@@ -16,38 +17,12 @@ export function GitHubSync({ projectId, onSyncComplete }: GitHubSyncProps) {
   const [description, setDescription] = useState('Project created with FlashIO')
   const [isPrivate, setIsPrivate] = useState(true)
   const [error, setError] = useState<string>('')
+  const [syncDetails, setSyncDetails] = useState<{
+    syncedFiles: number
+    errors: string[]
+  }>({ syncedFiles: 0, errors: [] })
 
-  const handleEnableSync = async () => {
-    setIsLoading(true)
-    setError('')
-    
-    try {
-      const response = await fetch('/api/storage', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          action: 'enable-sync',
-          projectId
-        }),
-      })
-
-      if (!response.ok) {
-        throw new Error('Failed to enable GitHub sync')
-      }
-
-      setSyncStatus('success')
-    } catch (err) {
-      setError('Failed to enable GitHub sync')
-      setSyncStatus('error')
-      console.error('GitHub sync error:', err)
-    } finally {
-      setIsLoading(false)
-    }
-  }
-
-  const handleSyncProject = async () => {
+  const handleSyncToGitHub = async () => {
     setIsLoading(true)
     setSyncStatus('syncing')
     setError('')
@@ -64,140 +39,182 @@ export function GitHubSync({ projectId, onSyncComplete }: GitHubSyncProps) {
           repoName,
           description,
           isPrivate,
-          autoCommit: true
         }),
       })
 
+      const result = await response.json()
+
       if (!response.ok) {
-        throw new Error('Failed to sync project to GitHub')
+        throw new Error(result.error || 'Failed to sync project')
       }
 
-      const result = await response.json()
-      setRepoUrl(result.repoUrl)
-      setSyncStatus('success')
-      
-      if (onSyncComplete) {
-        onSyncComplete(result.repoUrl)
+      if (result.success) {
+        setSyncStatus('success')
+        setRepoUrl(result.repoUrl)
+        setSyncDetails({
+          syncedFiles: result.syncedFiles || 0,
+          errors: result.errors || []
+        })
+        onSyncComplete?.(result.repoUrl)
+      } else {
+        throw new Error('Sync was not successful')
       }
     } catch (err) {
-      setError('Failed to sync project to GitHub')
       setSyncStatus('error')
-      console.error('GitHub sync error:', err)
+      setError(err instanceof Error ? err.message : 'Unknown error occurred')
     } finally {
       setIsLoading(false)
     }
   }
 
-  return (
-    <div className="space-y-6 p-6 border rounded-lg">
-      <div>
-        <h3 className="text-lg font-semibold mb-2">GitHub Integration</h3>
-        <p className="text-sm text-gray-600 mb-4">
-          Sync your project to GitHub for backup and collaboration. Your files are always stored locally first.
-        </p>
-      </div>
+  const resetSync = () => {
+    setSyncStatus('idle')
+    setRepoUrl('')
+    setError('')
+    setSyncDetails({ syncedFiles: 0, errors: [] })
+  }
 
-      {syncStatus === 'idle' && (
-        <div className="space-y-4">
-          <div>
-            <label className="block text-sm font-medium mb-1">Repository Name</label>
-            <input
-              type="text"
-              value={repoName}
-              onChange={(e) => setRepoName(e.target.value)}
-              className="w-full px-3 py-2 border rounded-md"
-              placeholder="flashio-project-name"
-            />
+  const renderSyncStatus = () => {
+    switch (syncStatus) {
+      case 'syncing':
+        return (
+          <div className="flex items-center gap-2 text-blue-600">
+            <Loader2 className="h-4 w-4 animate-spin" />
+            <span>Syncing to GitHub...</span>
           </div>
-          
-          <div>
-            <label className="block text-sm font-medium mb-1">Description</label>
-            <input
-              type="text"
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-              className="w-full px-3 py-2 border rounded-md"
-              placeholder="Project description"
-            />
-          </div>
-          
-          <div className="flex items-center">
-            <input
-              type="checkbox"
-              id="private-repo"
-              checked={isPrivate}
-              onChange={(e) => setIsPrivate(e.target.checked)}
-              className="mr-2"
-            />
-            <label htmlFor="private-repo" className="text-sm">
-              Make repository private
-            </label>
-          </div>
-          
-          <div className="flex space-x-3">
-            <Button
-              onClick={handleEnableSync}
-              disabled={isLoading}
+        )
+      case 'success':
+        return (
+          <div className="space-y-3">
+            <div className="flex items-center gap-2 text-green-600">
+              <CheckCircle className="h-4 w-4" />
+              <span>Successfully synced to GitHub!</span>
+            </div>
+            <div className="bg-green-50 p-3 rounded-md">
+              <p className="text-sm text-green-800">
+                <strong>Repository:</strong>{' '}
+                <a 
+                  href={repoUrl} 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="underline hover:no-underline"
+                >
+                  {repoUrl}
+                </a>
+              </p>
+              <p className="text-sm text-green-800 mt-1">
+                <strong>Files synced:</strong> {syncDetails.syncedFiles}
+              </p>
+              {syncDetails.errors.length > 0 && (
+                <div className="mt-2">
+                  <p className="text-sm text-amber-700 font-medium">Warnings:</p>
+                  <ul className="text-xs text-amber-600 mt-1 space-y-1">
+                    {syncDetails.errors.map((error, index) => (
+                      <li key={index}>• {error}</li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+            </div>
+            <Button 
+              onClick={resetSync}
               variant="outline"
+              size="sm"
             >
-              {isLoading ? 'Enabling...' : 'Enable GitHub Sync'}
+              Sync Again
             </Button>
-            
-            <Button
-              onClick={handleSyncProject}
-              disabled={isLoading || !repoName.trim()}
+          </div>
+        )
+      case 'error':
+        return (
+          <div className="space-y-3">
+            <div className="flex items-center gap-2 text-red-600">
+              <XCircle className="h-4 w-4" />
+              <span>Sync failed</span>
+            </div>
+            <div className="bg-red-50 p-3 rounded-md">
+              <p className="text-sm text-red-800">{error}</p>
+            </div>
+            <Button 
+              onClick={resetSync}
+              variant="outline"
+              size="sm"
             >
+              Try Again
+            </Button>
+          </div>
+        )
+      default:
+        return (
+          <div className="space-y-4">
+            <div className="space-y-3">
+              <div>
+                <label htmlFor="repoName" className="block text-sm font-medium text-gray-700 mb-1">
+                  Repository Name
+                </label>
+                <input
+                  id="repoName"
+                  type="text"
+                  value={repoName}
+                  onChange={(e) => setRepoName(e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  placeholder="my-awesome-project"
+                />
+              </div>
+              
+              <div>
+                <label htmlFor="description" className="block text-sm font-medium text-gray-700 mb-1">
+                  Description
+                </label>
+                <input
+                  id="description"
+                  type="text"
+                  value={description}
+                  onChange={(e) => setDescription(e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  placeholder="A brief description of your project"
+                />
+              </div>
+
+              <div className="flex items-center">
+                <input
+                  id="isPrivate"
+                  type="checkbox"
+                  checked={isPrivate}
+                  onChange={(e) => setIsPrivate(e.target.checked)}
+                  className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                />
+                <label htmlFor="isPrivate" className="ml-2 block text-sm text-gray-700">
+                  Make repository private
+                </label>
+              </div>
+            </div>
+
+            <Button 
+              onClick={handleSyncToGitHub}
+              disabled={isLoading || !repoName.trim()}
+              className="w-full"
+            >
+              <Github className="h-4 w-4 mr-2" />
               {isLoading ? 'Syncing...' : 'Sync to GitHub'}
             </Button>
           </div>
-        </div>
-      )}
+        )
+    }
+  }
 
-      {syncStatus === 'syncing' && (
-        <div className="text-center py-8">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <p className="text-sm text-gray-600">Syncing your project to GitHub...</p>
-        </div>
-      )}
-
-      {syncStatus === 'success' && repoUrl && (
-        <div className="text-center py-8 bg-green-50 rounded-lg">
-          <div className="text-green-600 text-2xl mb-2">✓</div>
-          <p className="text-sm text-green-700 mb-4">Successfully synced to GitHub!</p>
-          <a
-            href={repoUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-blue-600 hover:underline"
-          >
-            View Repository
-          </a>
-        </div>
-      )}
-
-      {syncStatus === 'error' && (
-        <div className="text-center py-8 bg-red-50 rounded-lg">
-          <div className="text-red-600 text-2xl mb-2">✗</div>
-          <p className="text-sm text-red-700 mb-4">{error}</p>
-          <Button
-            onClick={() => setSyncStatus('idle')}
-            variant="outline"
-            size="sm"
-          >
-            Try Again
-          </Button>
-        </div>
-      )}
-
-      <div className="text-xs text-gray-500 border-t pt-4">
-        <p><strong>How it works:</strong></p>
-        <ul className="list-disc list-inside space-y-1 mt-2">
-          <li>All files are stored locally first (no data loss)</li>
-          <li>GitHub sync is optional and provides cloud backup</li>
-          <li>You can work offline - sync happens when you're ready</li>
-          <li>Failed GitHub operations don't affect local development</li>
-        </ul>
+  return (
+    <div className="bg-white p-6 rounded-lg border shadow-sm">
+      <div className="flex items-center gap-2 mb-4">
+        <Github className="h-5 w-5" />
+        <h3 className="text-lg font-semibold">GitHub Sync</h3>
       </div>
+      
+      <div className="text-sm text-gray-600 mb-4">
+        Sync your project files to a GitHub repository for version control and sharing.
+      </div>
+
+      {renderSyncStatus()}
     </div>
   )
 }

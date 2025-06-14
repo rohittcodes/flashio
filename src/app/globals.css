@@ -121,3 +121,23 @@
     @apply bg-background text-foreground;
   }
 }
+
+/* Terminal specific styles */
+.terminal-content .xterm {
+  height: 100% !important;
+  width: 100% !important;
+}
+
+.terminal-content .xterm-screen {
+  display: block !important;
+  height: 100% !important;
+  width: 100% !important;
+}
+
+.terminal-content .xterm-viewport {
+  background-color: transparent !important;
+}
+
+.terminal-content .xterm-rows {
+  display: block !important;
+}

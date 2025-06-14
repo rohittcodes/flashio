@@ -5,6 +5,8 @@ import { CodeEditor } from '@/components/editor/code-editor'
 import { TerminalComponent } from '@/components/terminal/terminal'
 import { WebContainerProcess } from '@webcontainer/api'
 import { Button } from '@/components/ui/button'
+import { GitHubSync } from '@/components/storage/github-sync'
+import { Settings, Cloud, Database, Save, Github } from 'lucide-react'
 
 interface IDEProps {
   projectId: string
@@ -27,15 +29,53 @@ export function IDE({ projectId, initialFiles = [], className = '' }: IDEProps) 
   const [isWebContainerReady, setIsWebContainerReady] = useState(false)
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [sidebarTab, setSidebarTab] = useState<'files' | 'storage' | 'settings'>('files')
+  const [storageStatus, setStorageStatus] = useState({
+    s3: false,
+    github: false,
+    local: true
+  })
+  const [isSaving, setIsSaving] = useState(false)
 
   // Initialize WebContainer and load initial files
   useEffect(() => {
     initializeIDE()
   }, [projectId])
+
   const initializeIDE = async () => {
     try {
       setIsLoading(true)
       setError(null)
+
+      // Check if project needs bootstrapping
+      const bootstrapCheck = await fetch(`/api/projects/bootstrap?projectId=${projectId}`)
+      if (bootstrapCheck.ok) {
+        const { needsBootstrap } = await bootstrapCheck.json()
+          if (needsBootstrap) {
+          console.log('🚀 Project needs bootstrapping, creating default files...')
+          
+          // Bootstrap the project with default files
+          const bootstrapResponse = await fetch('/api/projects/bootstrap', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              projectId,
+              projectType: 'node', // Default to Node.js project
+            }),
+          })
+
+          if (bootstrapResponse.ok) {
+            const bootstrapResult = await bootstrapResponse.json()
+            console.log('✅ Project bootstrapped successfully:', bootstrapResult)
+          } else {
+            console.warn('⚠️ Failed to bootstrap project, continuing with existing files')
+          }
+        } else {
+          console.log('📁 Project already has files, skipping bootstrap')
+        }
+      }
 
       // Create WebContainer instance record
       const containerResponse = await fetch('/api/webcontainer', {
@@ -62,11 +102,12 @@ export function IDE({ projectId, initialFiles = [], className = '' }: IDEProps) 
         const webContainer = await WebContainer.boot({
           coep: 'require-corp',
           workdirName: `project-${projectId}`,
-        })
-
-        // Store the WebContainer instance globally for access by other components
+        })        // Store the WebContainer instance globally for access by other components
         ;(window as any).webContainerInstance = webContainer
         ;(window as any).webContainerInstanceId = instanceId
+
+        // Load project files into WebContainer from our database
+        await loadProjectFilesIntoWebContainer(webContainer, projectId)
 
         setIsWebContainerReady(true)
       }
@@ -90,6 +131,75 @@ export function IDE({ projectId, initialFiles = [], className = '' }: IDEProps) 
       setIsLoading(false)
     }
   }
+  // Load project files from database into WebContainer
+  const loadProjectFilesIntoWebContainer = async (webContainer: any, projectId: string) => {
+    try {
+      console.log(`🔍 Fetching files for project: ${projectId}`)
+      
+      // Get project files from our API
+      const response = await fetch(`/api/files?projectId=${projectId}`)
+      if (!response.ok) {
+        const errorText = await response.text()
+        console.warn(`Failed to fetch project files (${response.status}):`, errorText)
+        
+        // If it's a 500 error, the project might not exist yet
+        if (response.status === 500) {
+          console.log('Project might not exist yet or have no files. This is normal for new projects.')
+        }
+        return
+      }
+
+      const files = await response.json()
+      console.log(`📂 Found ${files.length} files for project ${projectId}:`, files.map((f: any) => f.path))
+
+      if (files.length === 0) {
+        console.log('📁 No files found for this project')
+        return
+      }
+
+      let loadedCount = 0
+        // Load each file into WebContainer
+      for (const file of files) {
+        try {
+          // Skip directories - they'll be created automatically when files are written
+          if (file.isDirectory) {
+            console.log(`Skipping directory: ${file.path}`)
+            continue
+          }
+
+          // Get file content
+          const fileResponse = await fetch(`/api/files?fileId=${file.id}`)
+          if (fileResponse.ok) {
+            const { content } = await fileResponse.json()
+            
+            // Ensure directory exists before writing file
+            const dirPath = file.path.split('/').slice(0, -1).join('/')
+            if (dirPath) {
+              try {
+                await webContainer.fs.mkdir(dirPath, { recursive: true })
+              } catch (error) {
+                // Directory might already exist, that's okay
+              }
+            }
+            
+            // Write to WebContainer filesystem
+            await webContainer.fs.writeFile(file.path, content || '', 'utf8')
+            loadedCount++
+            console.log(`✅ Loaded file: ${file.path} (${content?.length || 0} chars)`)
+          }
+        } catch (error) {
+          console.error(`❌ Failed to load file ${file.path}:`, error)
+        }
+      }      console.log(`Successfully loaded ${loadedCount}/${files.length} files into WebContainer`)
+
+      // Set the first file as active if no initial files provided
+      if (initialFiles.length === 0 && files.length > 0) {
+        setActiveFile(files[0].path)
+      }
+    } catch (error) {
+      console.error('Failed to load project files into WebContainer:', error)
+    }
+  }
 
   const getLanguageFromPath = (path: string): string => {
     const ext = path.split('.').pop()?.toLowerCase()
@@ -104,7 +214,6 @@ export function IDE({ projectId, initialFiles = [], className = '' }: IDEProps) 
       default: return 'javascript'
     }
   }
-
   const openFile = async (path: string) => {
     if (!webContainerId) return
 
@@ -116,13 +225,14 @@ export function IDE({ projectId, initialFiles = [], className = '' }: IDEProps) 
     }
 
     try {
-      // Read file from WebContainer
-      const response = await fetch(`/api/webcontainer/files?instanceId=${webContainerId}&path=${encodeURIComponent(path)}`)
-      if (!response.ok) {
-        throw new Error('Failed to read file')
+      // Get the WebContainer instance from window
+      const webContainer = (window as any).webContainerInstance
+      if (!webContainer) {
+        throw new Error('WebContainer instance not found')
       }
 
-      const { content } = await response.json()
+      // Read file from WebContainer directly (client-side)
+      const content = await webContainer.fs.readFile(path, 'utf8')
       const newFile: OpenFile = {
         path,
         content,
@@ -137,28 +247,91 @@ export function IDE({ projectId, initialFiles = [], className = '' }: IDEProps) 
       setError(`Failed to open file: ${path}`)
     }
   }
-
   const saveFile = async (path: string, content: string) => {
-    if (!webContainerId) return
+    if (!webContainerId) {
+      console.error('No WebContainer ID available for saving')
+      return
+    }
 
+    setIsSaving(true)
     try {
-      const response = await fetch('/api/webcontainer/files', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          instanceId: webContainerId,
-          path,
-          content,
-        }),
-      })
-
-      if (!response.ok) {
-        throw new Error('Failed to save file')
+      console.log(`💾 Saving file: ${path}`)      // Get the WebContainer instance from window
+      const webContainer = (window as any).webContainerInstance
+      if (!webContainer) {
+        throw new Error('WebContainer instance not found')
       }
 
-      // Update file state
+      // Ensure directory exists before writing file
+      const dirPath = path.split('/').slice(0, -1).join('/')
+      if (dirPath) {
+        try {
+          await webContainer.fs.mkdir(dirPath, { recursive: true })
+        } catch (error) {
+          // Directory might already exist, that's okay
+          console.log(`Directory ${dirPath} already exists or created`)
+        }
+      }
+
+      // Save to WebContainer directly (client-side)
+      await webContainer.fs.writeFile(path, content, 'utf8')
+      console.log('✅ Saved to WebContainer successfully')
+
+      // Save to database - check if file exists first
+      let fileId: string | null = null
+      
+      // Get all project files to find this file
+      const filesResponse = await fetch(`/api/files?projectId=${projectId}`)
+      if (filesResponse.ok) {
+        const files = await filesResponse.json()
+        const existingFile = files.find((f: any) => f.path === path)
+        if (existingFile) {
+          fileId = existingFile.id
+        }
+      }
+
+      if (fileId) {
+        // Update existing file
+        const updateResponse = await fetch('/api/files', {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            fileId,
+            content,
+          }),
+        })
+
+        if (!updateResponse.ok) {
+          const error = await updateResponse.text()
+          console.error('Failed to update file in database:', error)
+          throw new Error(`Failed to update file: ${error}`)
+        }
+
+        console.log('✅ Updated file in database successfully')
+      } else {
+        // Create new file
+        const createResponse = await fetch('/api/files', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            projectId,
+            path,
+            content,
+            language: getLanguageFromPath(path),
+          }),
+        })
+
+        if (!createResponse.ok) {
+          const error = await createResponse.text()
+          console.error('Failed to create file in database:', error)
+          throw new Error(`Failed to create file: ${error}`)
+        }
+
+        console.log('✅ Created new file in database successfully')
+      }      // Update file state in UI
       setOpenFiles(prev =>
         prev.map(file =>
           file.path === path
@@ -166,9 +339,13 @@ export function IDE({ projectId, initialFiles = [], className = '' }: IDEProps) 
             : file
         )
       )
+
+      console.log(`💾 File ${path} saved successfully`)
     } catch (error) {
       console.error('Failed to save file:', error)
       setError(`Failed to save file: ${path}`)
+    } finally {
+      setIsSaving(false)
     }
   }
 
@@ -222,6 +399,25 @@ export function IDE({ projectId, initialFiles = [], className = '' }: IDEProps) 
     }
   }
 
+  // Handle keyboard shortcuts
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      // Ctrl+S or Cmd+S to save current file
+      if ((event.ctrlKey || event.metaKey) && event.key === 's') {
+        event.preventDefault()
+        if (activeFile) {
+          const activeFileData = openFiles.find(f => f.path === activeFile)
+          if (activeFileData) {
+            saveFile(activeFileData.path, activeFileData.content)
+          }
+        }
+      }
+    }
+
+    window.addEventListener('keydown', handleKeyDown)
+    return () => window.removeEventListener('keydown', handleKeyDown)
+  }, [activeFile, openFiles])
+
   const activeFileData = openFiles.find(f => f.path === activeFile)
   if (isLoading) {
     return (
@@ -273,38 +469,130 @@ export function IDE({ projectId, initialFiles = [], className = '' }: IDEProps) 
           </Button>
         </div>
       </div>
-
-      {/* File tabs */}
-      {openFiles.length > 0 && (
-        <div className="file-tabs bg-gray-800 border-b border-gray-700 flex overflow-x-auto">
-          {openFiles.map((file) => (
-            <div
-              key={file.path}
-              className={`file-tab px-4 py-2 border-r border-gray-700 cursor-pointer flex items-center space-x-2 ${
-                activeFile === file.path ? 'bg-gray-700' : 'hover:bg-gray-750'
-              }`}
-              onClick={() => setActiveFile(file.path)}
-            >
-              <span className="text-sm">{file.path.split('/').pop()}</span>
-              {file.isModified && <div className="w-1 h-1 rounded-full bg-orange-400"></div>}
-              <button
-                onClick={(e) => {
-                  e.stopPropagation()
-                  closeFile(file.path)
-                }}
-                className="text-gray-400 hover:text-white"
-              >
-                ×
-              </button>
-            </div>
-          ))}
-        </div>
-      )}
-
-      {/* Main content area */}
       <div className="main-content flex-1 flex">
-        {/* Editor panel */}
+        {/* Storage/GitHub Sync Sidebar */}
+        <div className="storage-sidebar w-80 bg-gray-800 border-r border-gray-700 flex flex-col">
+          {/* Sidebar tabs */}
+          <div className="flex border-b border-gray-700">
+            <button
+              onClick={() => setSidebarTab('files')}
+              className={`flex-1 px-3 py-2 text-xs font-medium ${
+                sidebarTab === 'files' 
+                  ? 'bg-gray-700 text-white' 
+                  : 'text-gray-300 hover:text-white hover:bg-gray-750'
+              }`}
+            >
+              Files
+            </button>
+            <button
+              onClick={() => setSidebarTab('storage')}
+              className={`flex-1 px-3 py-2 text-xs font-medium ${
+                sidebarTab === 'storage' 
+                  ? 'bg-gray-700 text-white' 
+                  : 'text-gray-300 hover:text-white hover:bg-gray-750'
+              }`}
+            >
+              Storage
+            </button>
+          </div>
+
+          {/* Sidebar content */}
+          <div className="flex-1 overflow-y-auto">
+            {sidebarTab === 'files' && (
+              <div className="p-3">
+                <h3 className="text-sm font-medium text-gray-300 mb-2">Open Files</h3>
+                {openFiles.length > 0 ? (
+                  <div className="space-y-1">
+                    {openFiles.map((file) => (
+                      <div
+                        key={file.path}
+                        className={`flex items-center justify-between p-2 rounded cursor-pointer text-sm ${
+                          activeFile === file.path 
+                            ? 'bg-blue-600' 
+                            : 'bg-gray-700 hover:bg-gray-600'
+                        }`}
+                        onClick={() => setActiveFile(file.path)}
+                      >
+                        <span className="truncate">
+                          {file.path.split('/').pop()}
+                          {file.isModified && (
+                            <span className="ml-1 text-orange-400">•</span>
+                          )}
+                        </span>
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation()
+                            closeFile(file.path)
+                          }}
+                          className="ml-2 text-gray-400 hover:text-white"
+                        >
+                          ×
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="text-xs text-gray-500">No files open</p>
+                )}
+              </div>
+            )}
+
+            {sidebarTab === 'storage' && (
+              <div className="p-3 space-y-4">
+                {/* Storage Status */}
+                <div>
+                  <h3 className="text-sm font-medium text-gray-300 mb-3">Storage Status</h3>
+                  <div className="space-y-2">
+                    <div className="flex items-center gap-2 text-xs">
+                      <Database className="h-3 w-3" />
+                      <span>Local Database</span>
+                      {storageStatus.local ? (
+                        <span className="text-green-400">✓</span>
+                      ) : (
+                        <span className="text-red-400">✗</span>
+                      )}
+                    </div>
+                    <div className="flex items-center gap-2 text-xs">
+                      <Cloud className="h-3 w-3" />
+                      <span>S3 Storage</span>
+                      {storageStatus.s3 ? (
+                        <span className="text-green-400">✓</span>
+                      ) : (
+                        <span className="text-gray-400">○</span>
+                      )}
+                    </div>
+                    <div className="flex items-center gap-2 text-xs">
+                      <Github className="h-3 w-3" />
+                      <span>GitHub Sync</span>
+                      {storageStatus.github ? (
+                        <span className="text-green-400">✓</span>
+                      ) : (
+                        <span className="text-gray-400">○</span>
+                      )}
+                    </div>
+                  </div>
+                </div>
+
+                {/* GitHub Sync Component */}
+                <div className="border-t border-gray-700 pt-4">
+                  <GitHubSync 
+                    projectId={projectId}
+                    onSyncComplete={(repoUrl) => {
+                      setStorageStatus(prev => ({ ...prev, github: true }))
+                      console.log('Project synced to:', repoUrl)
+                    }}
+                  />
+                </div>
+              </div>
+            )}
+          </div>
+        </div>        {/* Editor panel */}
         <div className="editor-panel flex-1 flex flex-col">
+          {isSaving && (
+            <div className="bg-blue-100 border-l-4 border-blue-500 text-blue-700 p-2 text-sm">
+              💾 Saving file...
+            </div>
+          )}
           {activeFileData ? (
             <CodeEditor
               filePath={activeFileData.path}
