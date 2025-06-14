@@ -1,3 +1,5 @@
+'use client';
+
 import { FC, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Sparkles, Send, ChevronDown, Code, FileCode, GitBranch } from 'lucide-react';

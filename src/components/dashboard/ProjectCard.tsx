@@ -1,3 +1,5 @@
+'use client';
+
 import { FC } from 'react';
 import { motion } from 'framer-motion';
 import { Project } from '@/types/project';

@@ -1,9 +1,11 @@
-import { useState } from 'react';
-import DashboardLayout from '@/components/dashboard/DashboardLayout';
-import ProjectCard from '@/components/dashboard/ProjectCard';
-import { Project } from '@/types/project';
-import { motion } from 'framer-motion';
-import { ViewColumns, ViewGrid, Search, Filter } from 'lucide-react';
+import { requireAuth } from "@/lib/auth-utils";
+import { DashboardContent } from "@/components/dashboard/DashboardContent";
+import { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Dashboard - Flashio",
+  description: "Manage your coding projects",
+};
 
 export default function DashboardPage() {
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
@@ -93,8 +95,7 @@ export default function DashboardPage() {
                 className={`p-2 rounded ${
                   viewMode === 'grid' ? 'bg-gray-600 text-white' : 'text-gray-400'
                 }`}
-              >
-                <ViewGrid className="h-5 w-5" />
+              >                <LayoutGrid className="h-5 w-5" />
               </button>
               <button
                 onClick={() => setViewMode('list')}
@@ -102,7 +103,7 @@ export default function DashboardPage() {
                   viewMode === 'list' ? 'bg-gray-600 text-white' : 'text-gray-400'
                 }`}
               >
-                <ViewColumns className="h-5 w-5" />
+                <Table className="h-5 w-5" />
               </button>
             </div>
           </div>
