@@ -1,6 +1,6 @@
 {
-  "id": "4e616e45-d906-47e7-bbf2-1a5bd455bb4b",
-  "prevId": "bd425ad1-9353-4abc-b6ab-36ab44739354",
+  "id": "9cd07bdd-32b0-4988-ab15-0e575beac31b",
+  "prevId": "4e616e45-d906-47e7-bbf2-1a5bd455bb4b",
   "version": "7",
   "dialect": "postgresql",
   "tables": {
@@ -560,6 +560,25 @@
         },
         "binaryContent": {
           "name": "binaryContent",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "storageKey": {
+          "name": "storageKey",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "storageType": {
+          "name": "storageType",
+          "type": "varchar(20)",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "'database'"
+        },
+        "storageUrl": {
+          "name": "storageUrl",
           "type": "text",
           "primaryKey": false,
           "notNull": false

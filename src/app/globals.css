@@ -1,5 +1,6 @@
 @import "tailwindcss";
 @import "tw-animate-css";
+@import "@xterm/xterm/css/xterm.css";
 
 @custom-variant dark (&:is(.dark *));
 
@@ -119,4 +120,24 @@
   body {
     @apply bg-background text-foreground;
   }
+}
+
+/* Terminal specific styles */
+.terminal-content .xterm {
+  height: 100% !important;
+  width: 100% !important;
+}
+
+.terminal-content .xterm-screen {
+  display: block !important;
+  height: 100% !important;
+  width: 100% !important;
+}
+
+.terminal-content .xterm-viewport {
+  background-color: transparent !important;
+}
+
+.terminal-content .xterm-rows {
+  display: block !important;
 }
