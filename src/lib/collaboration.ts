@@ -1,4 +1,4 @@
-import { db } from '@/db/drizzle'
+import { db } from '@/db/schema'
 import { projectCollaborators, collaborationSessions } from '@/db/schemas'
 import { eq, and, or } from 'drizzle-orm'
 

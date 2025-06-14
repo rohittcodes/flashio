@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { auth } from '@/lib/auth'
-import { db } from '@/db/drizzle'
+import { db } from '@/db/schema'
 import { projects, projectFiles } from '@/db/schemas'
 import { eq, and } from 'drizzle-orm'
 import { FileStorageService } from '@/lib/file-storage'
@@ -30,7 +30,9 @@ const getDefaultFiles = (projectType: 'node' | 'react' | 'vanilla' = 'node'): De
         keywords: ['flashio', 'ide'],
         author: '',
         license: 'ISC',
-        dependencies: {},
+        dependencies: {
+          express: '^4.18.0'
+        },
         devDependencies: {}
       }, null, 2),
       language: 'json',
@@ -39,19 +41,152 @@ const getDefaultFiles = (projectType: 'node' | 'react' | 'vanilla' = 'node'): De
     {
       path: 'index.js',
       content: `// Welcome to FlashIO IDE!
-// This is your main entry point.
+// A simple Express.js server for preview functionality
 
-console.log('Hello from FlashIO! 🚀');
-console.log('Your project is ready to go.');
-console.log('Start coding by editing this file or creating new ones.');
+const express = require('express');
+const path = require('path');
 
-// Example function
-function greet(name) {
-  return \`Hello, \${name}! Welcome to your FlashIO project.\`;
-}
+const app = express();
+const port = process.env.PORT || 3000;
 
-// Test the function
-console.log(greet('Developer'));
+// Serve static files from public directory
+app.use(express.static(path.join(__dirname, 'public')));
+
+// Parse JSON bodies
+app.use(express.json());
+
+// Routes
+app.get('/', (req, res) => {
+  res.send(\`
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>FlashIO Project</title>
+        <style>
+            body {
+                font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+                max-width: 800px;
+                margin: 50px auto;
+                padding: 20px;
+                line-height: 1.6;
+                color: #333;
+            }
+            .header {
+                text-align: center;
+                margin-bottom: 40px;
+            }
+            .logo {
+                font-size: 3em;
+                margin-bottom: 10px;
+            }
+            .card {
+                background: #f8f9fa;
+                border-radius: 8px;
+                padding: 20px;
+                margin: 20px 0;
+                border-left: 4px solid #007bff;
+            }
+            .api-demo {
+                background: #e9ecef;
+                padding: 15px;
+                border-radius: 5px;
+                font-family: monospace;
+            }
+            .button {
+                display: inline-block;
+                background: #007bff;
+                color: white;
+                padding: 10px 20px;
+                text-decoration: none;
+                border-radius: 5px;
+                margin: 5px;
+            }
+        </style>
+    </head>
+    <body>
+        <div class="header">
+            <div class="logo">🚀</div>
+            <h1>Welcome to FlashIO!</h1>
+            <p>Your project is up and running!</p>
+        </div>
+        
+        <div class="card">
+            <h3>🎉 Success!</h3>
+            <p>Your Express.js server is running on port \${port}. You can now:</p>
+            <ul>
+                <li>Edit <code>index.js</code> to modify this page</li>
+                <li>Create new routes and endpoints</li>
+                <li>Install additional packages using the terminal</li>
+                <li>Use the preview panel to see your changes live</li>
+            </ul>
+        </div>
+        
+        <div class="card">
+            <h3>📡 API Example</h3>
+            <p>Try the API endpoint: <a href="/api/hello" class="button">GET /api/hello</a></p>
+            <div class="api-demo">
+                <strong>Response:</strong><br>
+                <span id="api-response">Click the button above to test</span>
+            </div>
+        </div>
+        
+        <div class="card">
+            <h3>🛠 Next Steps</h3>
+            <ul>
+                <li>Install dependencies: <code>npm install</code></li>
+                <li>Add new routes to this Express app</li>
+                <li>Create HTML, CSS, and JavaScript files</li>
+                <li>Build something amazing!</li>
+            </ul>
+        </div>
+        
+        <script>
+            // Simple API test
+            document.querySelector('a[href="/api/hello"]').addEventListener('click', async (e) => {
+                e.preventDefault();
+                try {
+                    const response = await fetch('/api/hello');
+                    const data = await response.json();
+                    document.getElementById('api-response').innerHTML = JSON.stringify(data, null, 2);
+                } catch (error) {
+                    document.getElementById('api-response').innerHTML = 'Error: ' + error.message;
+                }
+            });
+        </script>
+    </body>
+    </html>
+  \`);
+});
+
+// API endpoint example
+app.get('/api/hello', (req, res) => {
+  res.json({
+    message: 'Hello from FlashIO API!',
+    timestamp: new Date().toISOString(),
+    server: 'Express.js',
+    port: port
+  });
+});
+
+// API endpoint for project info
+app.get('/api/info', (req, res) => {
+  res.json({
+    project: 'FlashIO Project',
+    version: '1.0.0',
+    environment: process.env.NODE_ENV || 'development',
+    uptime: process.uptime(),
+    memory: process.memoryUsage()
+  });
+});
+
+// Start server
+app.listen(port, () => {
+  console.log(\`🚀 FlashIO project running on port \${port}\`);
+  console.log(\`📱 Open http://localhost:\${port} to view your project\`);
+  console.log(\`🔧 Edit index.js to modify this server\`);
+});
 `,
       language: 'javascript',
       mimeType: 'text/javascript'
@@ -158,6 +293,211 @@ build/
 `,
       language: 'gitignore',
       mimeType: 'text/plain'
+    },
+    {
+      path: 'public/index.html',
+      content: `<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FlashIO Static Page</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            min-height: 100vh;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            text-align: center;
+        }
+        .hero {
+            padding: 60px 20px;
+        }
+        .hero h1 {
+            font-size: 3.5em;
+            margin-bottom: 20px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+        .features {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 30px;
+            margin: 40px 0;
+        }
+        .feature {
+            background: rgba(255,255,255,0.1);
+            padding: 30px;
+            border-radius: 15px;
+            backdrop-filter: blur(10px);
+        }
+        .feature h3 {
+            font-size: 1.8em;
+            margin-bottom: 15px;
+        }
+        .cta {
+            margin: 50px 0;
+        }
+        .button {
+            display: inline-block;
+            background: rgba(255,255,255,0.2);
+            color: white;
+            padding: 15px 30px;
+            text-decoration: none;
+            border-radius: 25px;
+            margin: 10px;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+        }
+        .button:hover {
+            background: rgba(255,255,255,0.3);
+            transform: translateY(-2px);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="hero">
+            <h1>🚀 FlashIO</h1>
+            <p>Build, Preview, and Deploy - All in Your Browser</p>
+        </div>
+        
+        <div class="features">
+            <div class="feature">
+                <h3>⚡ Instant Setup</h3>
+                <p>Start coding immediately with pre-configured templates and dependencies</p>
+            </div>
+            <div class="feature">
+                <h3>🔴 Live Preview</h3>
+                <p>See your changes in real-time with our integrated preview panel</p>
+            </div>
+            <div class="feature">
+                <h3>🌐 Full-Stack Ready</h3>
+                <p>Build APIs, frontends, and full applications with complete Node.js support</p>
+            </div>
+        </div>
+        
+        <div class="cta">
+            <a href="/api/hello" class="button">Test API</a>
+            <a href="/api/info" class="button">Project Info</a>
+        </div>
+        
+        <p style="margin-top: 60px; opacity: 0.8;">
+            Edit <code>public/index.html</code> to customize this page
+        </p>
+    </div>
+</body>
+</html>`,
+      language: 'html',
+      mimeType: 'text/html'
+    },
+    {
+      path: 'public/style.css',
+      content: `/* Custom styles for your FlashIO project */
+
+:root {
+  --primary-color: #007bff;
+  --secondary-color: #6c757d;
+  --success-color: #28a745;
+  --danger-color: #dc3545;
+  --warning-color: #ffc107;
+  --info-color: #17a2b8;
+  --light-color: #f8f9fa;
+  --dark-color: #343a40;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  line-height: 1.6;
+  color: var(--dark-color);
+  background-color: var(--light-color);
+}
+
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 20px;
+}
+
+.btn {
+  display: inline-block;
+  padding: 0.5rem 1rem;
+  font-size: 1rem;
+  border: none;
+  border-radius: 0.25rem;
+  text-decoration: none;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.btn-primary {
+  background-color: var(--primary-color);
+  color: white;
+}
+
+.btn-primary:hover {
+  background-color: #0056b3;
+  transform: translateY(-1px);
+}
+
+.card {
+  background: white;
+  border-radius: 0.5rem;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  padding: 1.5rem;
+  margin: 1rem 0;
+}
+
+.grid {
+  display: grid;
+  gap: 2rem;
+}
+
+.grid-2 {
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+}
+
+.grid-3 {
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+}
+
+.text-center {
+  text-align: center;
+}
+
+.text-primary {
+  color: var(--primary-color);
+}
+
+.mt-4 {
+  margin-top: 2rem;
+}
+
+.mb-4 {
+  margin-bottom: 2rem;
+}
+
+@media (max-width: 768px) {
+  .container {
+    padding: 0 10px;
+  }
+  
+  .grid {
+    gap: 1rem;
+  }
+}`,
+      language: 'css',
+      mimeType: 'text/css'
     }
   ]
 

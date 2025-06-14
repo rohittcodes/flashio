@@ -1,5 +1,5 @@
 import { WebContainer, WebContainerProcess, FileSystemTree } from '@webcontainer/api'
-import { db } from '@/db/drizzle'
+import { db } from '@/db/schema'
 import { webContainerInstances, terminalSessions, fileWatchers, fileWatcherEvents } from '@/db/schemas'
 import { eq, and } from 'drizzle-orm'
 
@@ -397,5 +397,124 @@ export class WebContainerService {
         await this.terminateContainer(instance.id)
       }
     }
+  }
+
+  /**
+   * Setup preview listeners for a WebContainer instance
+   */
+  static async setupPreviewListeners(
+    instanceId: string,
+    onServerReady?: (port: number, url: string) => void,
+    onPort?: (port: number, type: 'open' | 'close', url: string) => void,
+    onError?: (error: { message: string }) => void
+  ): Promise<(() => void)[]> {
+    const webContainer = await this.getInstance(instanceId)
+    if (!webContainer) {
+      throw new Error('WebContainer instance not found')
+    }
+
+    const unsubscribeFunctions: (() => void)[] = []
+
+    // Listen for server-ready events
+    if (onServerReady) {
+      const unsubscribe = webContainer.on('server-ready', (port: number, url: string) => {
+        onServerReady(port, url)
+        // Update database with the active port and URL
+        this.updateContainerPort(instanceId, port, url)
+      })
+      unsubscribeFunctions.push(unsubscribe)
+    }
+
+    // Listen for port events
+    if (onPort) {
+      const unsubscribe = webContainer.on('port', (port: number, type: 'open' | 'close', url: string) => {
+        onPort(port, type, url)
+        if (type === 'open') {
+          this.updateContainerPort(instanceId, port, url)
+        }
+      })
+      unsubscribeFunctions.push(unsubscribe)
+    }
+
+    // Listen for errors
+    if (onError) {
+      const unsubscribe = webContainer.on('error', (error: { message: string }) => {
+        onError(error)
+      })
+      unsubscribeFunctions.push(unsubscribe)
+    }
+
+    return unsubscribeFunctions
+  }
+
+  /**
+   * Update container port and URL in database
+   */
+  private static async updateContainerPort(instanceId: string, port: number, url: string): Promise<void> {
+    await db
+      .update(webContainerInstances)
+      .set({ 
+        port,
+        containerUrl: url,
+        lastActivity: new Date()
+      })
+      .where(eq(webContainerInstances.id, instanceId))
+  }
+
+  /**
+   * Get the current preview URL for a container
+   */
+  static async getCurrentPreviewUrl(instanceId: string): Promise<string | null> {
+    const instance = await db
+      .select()
+      .from(webContainerInstances)
+      .where(eq(webContainerInstances.id, instanceId))
+      .limit(1)
+
+    return instance[0]?.containerUrl || null
+  }
+
+  /**
+   * Start a development server process
+   */
+  static async startDevServer(
+    instanceId: string,
+    command: string = 'npm run dev',
+    cwd?: string
+  ): Promise<WebContainerProcess> {
+    const webContainer = await this.getInstance(instanceId)
+    if (!webContainer) {
+      throw new Error('WebContainer instance not found')
+    }
+
+    const [cmd, ...args] = command.split(' ')
+    const process = await webContainer.spawn(cmd, args, {
+      cwd,
+      terminal: { cols: 80, rows: 24 }
+    })
+
+    return process
+  }
+
+  /**
+   * Install dependencies in a WebContainer
+   */
+  static async installDependencies(
+    instanceId: string,
+    packageManager: 'npm' | 'yarn' | 'pnpm' = 'npm'
+  ): Promise<WebContainerProcess> {
+    const webContainer = await this.getInstance(instanceId)
+    if (!webContainer) {
+      throw new Error('WebContainer instance not found')
+    }
+
+    const installCommand = packageManager === 'npm' ? 'install' : 
+                          packageManager === 'yarn' ? 'install' : 'install'
+
+    const process = await webContainer.spawn(packageManager, [installCommand], {
+      terminal: { cols: 80, rows: 24 }
+    })
+
+    return process
   }
 }

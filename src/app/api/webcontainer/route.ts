@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { auth } from '@/lib/auth'
-import { db } from '@/db/drizzle'
+import { db } from '@/db/schema'
 import { webContainerInstances, projects } from '@/db/schemas'
 import { eq, and } from 'drizzle-orm'
 import { randomUUID } from 'crypto'

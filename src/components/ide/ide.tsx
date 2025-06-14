@@ -3,10 +3,11 @@
 import { useState, useEffect, useRef } from 'react'
 import { CodeEditor } from '@/components/editor/code-editor'
 import { TerminalComponent } from '@/components/terminal/terminal'
+import { Preview } from '@/components/ide/preview'
 import { WebContainerProcess } from '@webcontainer/api'
 import { Button } from '@/components/ui/button'
 import { GitHubSync } from '@/components/storage/github-sync'
-import { Settings, Cloud, Database, Save, Github } from 'lucide-react'
+import { Settings, Cloud, Database, Save, Github, Monitor } from 'lucide-react'
 
 interface IDEProps {
   projectId: string
@@ -30,12 +31,76 @@ export function IDE({ projectId, initialFiles = [], className = '' }: IDEProps) 
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [sidebarTab, setSidebarTab] = useState<'files' | 'storage' | 'settings'>('files')
+  const [showPreview, setShowPreview] = useState(false)
   const [storageStatus, setStorageStatus] = useState({
     s3: false,
     github: false,
     local: true
   })
-  const [isSaving, setIsSaving] = useState(false)
+  const [isSaving, setIsSaving] = useState(false)  // Set up preview listeners for WebContainer
+  const setupPreviewListeners = (webContainer: any) => {
+    console.log('🔧 Setting up WebContainer preview listeners...')
+    
+    // Listen for server-ready events
+    webContainer.on('server-ready', (port: number, url: string) => {
+      console.log(`🚀 Server ready on port ${port}:`, url)
+      // URL is already provided in the event, no need to generate it
+    })
+
+    // Listen for port events
+    webContainer.on('port', (port: number, type: 'open' | 'close', url: string) => {
+      console.log(`📡 Port ${port} ${type}:`, url)
+      // URL is already provided in the event for 'open' events
+    })
+
+    // Listen for errors
+    webContainer.on('error', (error: { message: string }) => {
+      console.error('❌ WebContainer error:', error)
+      setError(error.message)
+    })
+
+    // Listen for preview messages
+    webContainer.on('preview-message', (message: any) => {
+      console.log('📨 Preview message:', message)
+    })
+
+    console.log('✅ WebContainer preview listeners set up successfully')
+  }  // Mount initial files to WebContainer
+  const mountInitialFiles = async (webContainer: any) => {
+    try {
+      // Convert initialFiles to WebContainer FileSystemTree format
+      const fileTree: any = {}
+      
+      for (const file of initialFiles) {
+        const path = file.path.startsWith('/') ? file.path.slice(1) : file.path
+        const pathParts = path.split('/')
+        
+        let current = fileTree
+        for (let i = 0; i < pathParts.length - 1; i++) {
+          const part = pathParts[i]
+          if (!current[part]) {
+            current[part] = { directory: {} }
+          }
+          current = current[part].directory
+        }
+        
+        const fileName = pathParts[pathParts.length - 1]
+        current[fileName] = {
+          file: {
+            contents: file.content
+          }
+        }
+      }
+
+      console.log('📁 Mounting file tree:', Object.keys(fileTree))
+      await webContainer.mount(fileTree)
+      
+      console.log('✅ Initial files mounted successfully')
+    } catch (error) {
+      console.error('❌ Failed to mount initial files:', error)
+      throw error
+    }
+  }
 
   // Initialize WebContainer and load initial files
   useEffect(() => {
@@ -97,17 +162,26 @@ export function IDE({ projectId, initialFiles = [], className = '' }: IDEProps) 
 
       const { instanceId } = await containerResponse.json()
       setWebContainerId(instanceId)      // Boot WebContainer client-side
-      if (typeof window !== 'undefined') {
-        const { WebContainer } = await import('@webcontainer/api')
+      if (typeof window !== 'undefined') {        const { WebContainer } = await import('@webcontainer/api')
         const webContainer = await WebContainer.boot({
           coep: 'require-corp',
           workdirName: `project-${projectId}`,
-        })        // Store the WebContainer instance globally for access by other components
+          forwardPreviewErrors: true, // Enable preview error forwarding
+        })// Store the WebContainer instance globally for access by other components
         ;(window as any).webContainerInstance = webContainer
         ;(window as any).webContainerInstanceId = instanceId
 
-        // Load project files into WebContainer from our database
-        await loadProjectFilesIntoWebContainer(webContainer, projectId)
+        // Set up preview listeners FIRST
+        setupPreviewListeners(webContainer)
+
+        // Mount initial files if provided, otherwise load from database
+        if (initialFiles.length > 0) {
+          console.log('🚀 Mounting initial files into WebContainer...')
+          await mountInitialFiles(webContainer)
+        } else {
+          console.log('📁 Loading project files from database...')
+          await loadProjectFilesIntoWebContainer(webContainer, projectId)
+        }
 
         setIsWebContainerReady(true)
       }
@@ -449,13 +523,13 @@ export function IDE({ projectId, initialFiles = [], className = '' }: IDEProps) 
         <div className="flex items-center space-x-4">
           <h1 className="text-lg font-semibold">FlashIO IDE</h1>
           <div className={`w-2 h-2 rounded-full ${isWebContainerReady ? 'bg-green-400' : 'bg-yellow-400'}`}></div>
-        </div>
-        <div className="flex items-center space-x-2">
+        </div>        <div className="flex items-center space-x-2">
           <Button
             size="sm"
             variant="outline"
             onClick={() => runCommand('npm install')}
             disabled={!isWebContainerReady}
+            className='bg-gray-700 hover:bg-gray-600 text-gray-300 cursor-pointer'
           >
             Install Dependencies
           </Button>
@@ -464,8 +538,18 @@ export function IDE({ projectId, initialFiles = [], className = '' }: IDEProps) 
             variant="outline"
             onClick={() => runCommand('npm run dev')}
             disabled={!isWebContainerReady}
+            className='bg-gray-700 hover:bg-gray-600 text-gray-300 cursor-pointer'
           >
             Start Dev Server
+          </Button>
+          <Button
+            size="sm"
+            variant={showPreview ? "default" : "outline"}
+            onClick={() => setShowPreview(!showPreview)}
+            className='bg-gray-700 hover:bg-gray-600 text-gray-300 cursor-pointer'
+          >
+            <Monitor className="w-4 h-4 mr-1" />
+            Preview
           </Button>
         </div>
       </div>
@@ -610,21 +694,29 @@ export function IDE({ projectId, initialFiles = [], className = '' }: IDEProps) 
               </div>
             </div>
           )}
-        </div>
-
-        {/* Terminal panel */}
-        <div className="terminal-panel w-1/2 border-l border-gray-700">
-          {webContainerId && (
-            <TerminalComponent
-              sessionId={terminalSessionId || ''}
-              webContainerId={webContainerId}
-              projectId={projectId}
-              onProcessCreated={(process) => {
-                console.log('Terminal process created:', process)
-              }}
-              className="h-full"
-            />
+        </div>        {/* Terminal and Preview panel */}
+        <div className="right-panel w-1/2 border-l border-gray-700 flex flex-col">
+          {showPreview && (
+            <div className="preview-panel flex-1 border-b border-gray-700">
+              <Preview 
+                webContainerInstanceId={webContainerId}
+                className="h-full"
+              />
+            </div>
           )}
+          <div className={`terminal-panel ${showPreview ? 'flex-1' : 'h-full'}`}>
+            {webContainerId && (
+              <TerminalComponent
+                sessionId={terminalSessionId || ''}
+                webContainerId={webContainerId}
+                projectId={projectId}
+                onProcessCreated={(process) => {
+                  console.log('Terminal process created:', process)
+                }}
+                className="h-full"
+              />
+            )}
+          </div>
         </div>
       </div>
     </div>
