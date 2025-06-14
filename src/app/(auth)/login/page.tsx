@@ -1,5 +1,4 @@
 import Login from "@/components/auth/login";
-import { requireNoAuth } from "@/lib/auth-utils";
 import { Metadata } from "next";
 
 export const metadata: Metadata = {
@@ -8,9 +7,6 @@ export const metadata: Metadata = {
 };
 
 export default async function LoginPage() {
-  // Prevent authenticated users from accessing login
-  await requireNoAuth();
-
   return (
     <div className="flex min-h-screen flex-col items-center justify-center bg-gradient-to-b from-gray-900 to-black p-4">
       <div className="w-full max-w-sm space-y-6 text-center">
