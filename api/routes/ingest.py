@@ -31,7 +31,8 @@ async def ingest_log_file(
     field_mappings: Optional[Dict[str, Any]] = Form(None),
     log_store: ChromaLogStore = Depends(get_log_store)
 ):
-    """Ingest logs from an uploaded file"""    temp_path = None
+    """Ingest logs from an uploaded file"""
+    temp_path = None
     try:
         # Create a temporary file to store the upload
         content = await file.read()
@@ -107,7 +108,8 @@ async def ingest_log_file(
             "filename": file.filename
         }
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Error ingesting log file: {str(e)}")    finally:
+        raise HTTPException(status_code=500, detail=f"Error ingesting log file: {str(e)}")
+    finally:
         # Clean up the temporary file
         if temp_path and os.path.exists(temp_path):
             import time
@@ -117,23 +119,24 @@ async def ingest_log_file(
             gc.collect()
             time.sleep(0.1)
             
-            # Try multiple times to delete the file
-            for attempt in range(3):
-                try:
-                    os.unlink(temp_path)
-                    break
-                except (PermissionError, OSError) as cleanup_error:
-                    if attempt < 2:  # Not the last attempt
-                        time.sleep(0.5)  # Wait a bit longer
-                        continue
-                    else:
-                        print(f"Warning: Failed to cleanup temporary file {temp_path} after {attempt + 1} attempts: {cleanup_error}")
-                        # On Windows, schedule for deletion on next reboot as last resort
-                        try:
-                            import atexit
-                            atexit.register(lambda: os.unlink(temp_path) if os.path.exists(temp_path) else None)
-                        except:
-                            pass
+            try:
+                # Try multiple times to delete the file
+                for attempt in range(3):
+                    try:
+                        os.unlink(temp_path)
+                        break
+                    except (PermissionError, OSError) as cleanup_error:
+                        if attempt < 2:  # Not the last attempt
+                            time.sleep(0.5)  # Wait a bit longer
+                            continue
+                        else:
+                            print(f"Warning: Failed to cleanup temporary file {temp_path} after {attempt + 1} attempts: {cleanup_error}")
+                            # On Windows, schedule for deletion on next reboot as last resort
+                            try:
+                                import atexit
+                                atexit.register(lambda: os.unlink(temp_path) if os.path.exists(temp_path) else None)
+                            except:
+                                pass
             except Exception as cleanup_error:
                 print(f"Warning: Failed to cleanup temporary file {temp_path}: {cleanup_error}")
 
