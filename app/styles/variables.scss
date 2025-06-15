@@ -1,0 +1,247 @@
+/* Color Tokens Light Theme */
+:root,
+:root[data-theme='light'] {
+  --flashio-elements-borderColor: rgba(139, 92, 246, 0.15);
+  --flashio-elements-borderColorActive: #8b5cf6;
+
+  --flashio-elements-bg-depth-1: linear-gradient(135deg, #fdfbff 0%, #f8fafc 100%);
+  --flashio-elements-bg-depth-2: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%);
+  --flashio-elements-bg-depth-3: linear-gradient(135deg, #e2e8f0 0%, #cbd5e1 100%);
+  --flashio-elements-bg-depth-4: rgba(139, 92, 246, 0.05);
+
+  --flashio-elements-textPrimary: #1e293b;
+  --flashio-elements-textSecondary: #475569;
+  --flashio-elements-textTertiary: #64748b;
+  --flashio-elements-code-background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+  --flashio-elements-code-text: #1e293b;
+
+  --flashio-elements-button-primary-background: linear-gradient(135deg, #8b5cf6 0%, #a855f7 100%);
+  --flashio-elements-button-primary-backgroundHover: linear-gradient(135deg, #7c3aed 0%, #9333ea 100%);
+  --flashio-elements-button-primary-text: #ffffff;
+
+  --flashio-elements-button-secondary-background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+  --flashio-elements-button-secondary-backgroundHover: linear-gradient(135deg, #e2e8f0 0%, #cbd5e1 100%);
+  --flashio-elements-button-secondary-text: #475569;
+
+  --flashio-elements-button-danger-background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+  --flashio-elements-button-danger-backgroundHover: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
+  --flashio-elements-button-danger-text: #ffffff;
+  --flashio-elements-item-contentDefault: #64748b;
+  --flashio-elements-item-contentActive: #1e293b;
+  --flashio-elements-item-contentAccent: #8b5cf6;
+  --flashio-elements-item-contentDanger: #ef4444;
+  --flashio-elements-item-backgroundDefault: rgba(139, 92, 246, 0);
+  --flashio-elements-item-backgroundActive: rgba(139, 92, 246, 0.1);
+  --flashio-elements-item-backgroundAccent: rgba(139, 92, 246, 0.15);
+  --flashio-elements-item-backgroundDanger: rgba(239, 68, 68, 0.1);
+
+  --flashio-elements-loader-background: rgba(139, 92, 246, 0.1);
+  --flashio-elements-loader-progress: #8b5cf6;
+
+  --flashio-elements-artifacts-background: linear-gradient(135deg, #ffffff 0%, #fdfbff 100%);
+  --flashio-elements-artifacts-backgroundHover: rgba(139, 92, 246, 0.05);
+  --flashio-elements-artifacts-borderColor: var(--flashio-elements-borderColor);
+  --flashio-elements-artifacts-inlineCode-background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+  --flashio-elements-artifacts-inlineCode-text: var(--flashio-elements-textPrimary);
+
+  --flashio-elements-actions-background: linear-gradient(135deg, #ffffff 0%, #fdfbff 100%);
+  --flashio-elements-actions-code-background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+  --flashio-elements-messages-background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+  --flashio-elements-messages-linkColor: #8b5cf6;
+  --flashio-elements-messages-code-background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+  --flashio-elements-messages-inlineCode-background: linear-gradient(135deg, #e2e8f0 0%, #cbd5e1 100%);
+  --flashio-elements-messages-inlineCode-text: #1e293b;
+
+  --flashio-elements-icon-success: #10b981;
+  --flashio-elements-icon-error: #ef4444;
+  --flashio-elements-icon-primary: #1e293b;
+  --flashio-elements-icon-secondary: #475569;
+  --flashio-elements-icon-tertiary: #64748b;
+
+  --flashio-elements-dividerColor: rgba(139, 92, 246, 0.15);
+
+  --flashio-elements-prompt-background: rgba(255, 255, 255, 0.9);
+
+  --flashio-elements-sidebar-dropdownShadow: rgba(139, 92, 246, 0.1);
+  --flashio-elements-sidebar-buttonBackgroundDefault: linear-gradient(135deg, #8b5cf6 0%, #a855f7 100%);
+  --flashio-elements-sidebar-buttonBackgroundHover: linear-gradient(135deg, #7c3aed 0%, #9333ea 100%);
+  --flashio-elements-sidebar-buttonText: #ffffff;
+
+  --flashio-elements-preview-addressBar-background: theme('colors.gray.100');
+  --flashio-elements-preview-addressBar-backgroundHover: theme('colors.alpha.gray.5');
+  --flashio-elements-preview-addressBar-backgroundActive: theme('colors.white');
+  --flashio-elements-preview-addressBar-text: var(--flashio-elements-textSecondary);
+  --flashio-elements-preview-addressBar-textActive: var(--flashio-elements-textPrimary);
+
+  --flashio-elements-terminals-background: theme('colors.white');
+  --flashio-elements-terminals-buttonBackground: var(--flashio-elements-bg-depth-4);
+
+  --flashio-elements-cta-background: theme('colors.gray.100');
+  --flashio-elements-cta-text: theme('colors.gray.950');
+
+  /* Terminal Colors */
+  --flashio-terminal-background: var(--flashio-elements-terminals-background);
+  --flashio-terminal-foreground: #333333;
+  --flashio-terminal-selection-background: #00000040;
+  --flashio-terminal-black: #000000;
+  --flashio-terminal-red: #cd3131;
+  --flashio-terminal-green: #00bc00;
+  --flashio-terminal-yellow: #949800;
+  --flashio-terminal-blue: #0451a5;
+  --flashio-terminal-magenta: #bc05bc;
+  --flashio-terminal-cyan: #0598bc;
+  --flashio-terminal-white: #555555;
+  --flashio-terminal-brightBlack: #686868;
+  --flashio-terminal-brightRed: #cd3131;
+  --flashio-terminal-brightGreen: #00bc00;
+  --flashio-terminal-brightYellow: #949800;
+  --flashio-terminal-brightBlue: #0451a5;
+  --flashio-terminal-brightMagenta: #bc05bc;
+  --flashio-terminal-brightCyan: #0598bc;
+  --flashio-terminal-brightWhite: #a5a5a5;
+}
+
+/* Color Tokens Dark Theme */
+:root[data-theme='dark'] {
+  --flashio-elements-borderColor: rgba(139, 92, 246, 0.25);
+  --flashio-elements-borderColorActive: #a855f7;
+
+  --flashio-elements-bg-depth-1: linear-gradient(135deg, #0f0f23 0%, #1a1a2e 100%);
+  --flashio-elements-bg-depth-2: linear-gradient(135deg, #16213e 0%, #1e293b 100%);
+  --flashio-elements-bg-depth-3: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+  --flashio-elements-bg-depth-4: rgba(139, 92, 246, 0.1);
+
+  --flashio-elements-textPrimary: #f8fafc;
+  --flashio-elements-textSecondary: #cbd5e1;
+  --flashio-elements-textTertiary: #94a3b8;
+  --flashio-elements-code-background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+  --flashio-elements-code-text: #f8fafc;
+
+  --flashio-elements-button-primary-background: linear-gradient(135deg, #8b5cf6 0%, #a855f7 100%);
+  --flashio-elements-button-primary-backgroundHover: linear-gradient(135deg, #7c3aed 0%, #9333ea 100%);
+  --flashio-elements-button-primary-text: #ffffff;
+
+  --flashio-elements-button-secondary-background: linear-gradient(135deg, #334155 0%, #475569 100%);
+  --flashio-elements-button-secondary-backgroundHover: linear-gradient(135deg, #475569 0%, #64748b 100%);
+  --flashio-elements-button-secondary-text: #f8fafc;
+
+  --flashio-elements-button-danger-background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+  --flashio-elements-button-danger-backgroundHover: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
+  --flashio-elements-button-danger-text: #ffffff;
+
+  --flashio-elements-item-contentDefault: theme('colors.alpha.white.50');
+  --flashio-elements-item-contentActive: theme('colors.white');
+  --flashio-elements-item-contentAccent: theme('colors.accent.500');
+  --flashio-elements-item-contentDanger: theme('colors.red.500');
+  --flashio-elements-item-backgroundDefault: rgba(255, 255, 255, 0);
+  --flashio-elements-item-backgroundActive: theme('colors.alpha.white.10');
+  --flashio-elements-item-backgroundAccent: theme('colors.alpha.accent.10');
+  --flashio-elements-item-backgroundDanger: theme('colors.alpha.red.10');
+
+  --flashio-elements-loader-background: theme('colors.alpha.gray.10');
+  --flashio-elements-loader-progress: theme('colors.accent.500');
+
+  --flashio-elements-artifacts-background: theme('colors.gray.900');
+  --flashio-elements-artifacts-backgroundHover: theme('colors.alpha.white.5');
+  --flashio-elements-artifacts-borderColor: var(--flashio-elements-borderColor);
+  --flashio-elements-artifacts-inlineCode-background: theme('colors.gray.800');
+  --flashio-elements-artifacts-inlineCode-text: theme('colors.white');
+
+  --flashio-elements-actions-background: theme('colors.gray.900');
+  --flashio-elements-actions-code-background: theme('colors.gray.800');
+
+  --flashio-elements-messages-background: theme('colors.gray.800');
+  --flashio-elements-messages-linkColor: theme('colors.accent.500');
+  --flashio-elements-messages-code-background: theme('colors.gray.900');
+  --flashio-elements-messages-inlineCode-background: theme('colors.gray.700');
+  --flashio-elements-messages-inlineCode-text: var(--flashio-elements-textPrimary);
+
+  --flashio-elements-icon-success: theme('colors.green.400');
+  --flashio-elements-icon-error: theme('colors.red.400');
+  --flashio-elements-icon-primary: theme('colors.gray.950');
+  --flashio-elements-icon-secondary: theme('colors.gray.600');
+  --flashio-elements-icon-tertiary: theme('colors.gray.500');
+
+  --flashio-elements-dividerColor: theme('colors.gray.100');
+
+  --flashio-elements-prompt-background: theme('colors.alpha.gray.80');
+
+  --flashio-elements-sidebar-dropdownShadow: theme('colors.alpha.gray.30');
+  --flashio-elements-sidebar-buttonBackgroundDefault: theme('colors.alpha.accent.10');
+  --flashio-elements-sidebar-buttonBackgroundHover: theme('colors.alpha.accent.20');
+  --flashio-elements-sidebar-buttonText: theme('colors.accent.500');
+
+  --flashio-elements-preview-addressBar-background: var(--flashio-elements-bg-depth-1);
+  --flashio-elements-preview-addressBar-backgroundHover: theme('colors.alpha.white.5');
+  --flashio-elements-preview-addressBar-backgroundActive: var(--flashio-elements-bg-depth-1);
+  --flashio-elements-preview-addressBar-text: var(--flashio-elements-textSecondary);
+  --flashio-elements-preview-addressBar-textActive: var(--flashio-elements-textPrimary);
+
+  --flashio-elements-terminals-background: var(--flashio-elements-bg-depth-1);
+  --flashio-elements-terminals-buttonBackground: var(--flashio-elements-bg-depth-3);
+
+  --flashio-elements-cta-background: theme('colors.alpha.white.10');
+  --flashio-elements-cta-text: theme('colors.white');
+
+  /* Terminal Colors */
+  --flashio-terminal-background: var(--flashio-elements-terminals-background);
+  --flashio-terminal-foreground: #eff0eb;
+  --flashio-terminal-selection-background: #97979b33;
+  --flashio-terminal-black: #000000;
+  --flashio-terminal-red: #ff5c57;
+  --flashio-terminal-green: #5af78e;
+  --flashio-terminal-yellow: #f3f99d;
+  --flashio-terminal-blue: #57c7ff;
+  --flashio-terminal-magenta: #ff6ac1;
+  --flashio-terminal-cyan: #9aedfe;
+  --flashio-terminal-white: #f1f1f0;
+  --flashio-terminal-brightBlack: #686868;
+  --flashio-terminal-brightRed: #ff5c57;
+  --flashio-terminal-brightGreen: #5af78e;
+  --flashio-terminal-brightYellow: #f3f99d;
+  --flashio-terminal-brightBlue: #57c7ff;
+  --flashio-terminal-brightMagenta: #ff6ac1;
+  --flashio-terminal-brightCyan: #9aedfe;
+  --flashio-terminal-brightWhite: #f1f1f0;
+}
+
+/*
+ * Element Tokens
+ *
+ * Hierarchy: Element Token -> (Element Token | Color Tokens) -> Primitives
+ */
+:root {
+  --header-height: 80px;
+  --sidebar-width: 280px;
+  --chat-max-width: 42rem;
+  --chat-min-width: 680px;
+  --workbench-width: min(calc(100% - var(--chat-min-width) - var(--sidebar-width)), 1536px);
+  --workbench-inner-width: var(--workbench-width);
+  --workbench-left: calc(var(--sidebar-width) + var(--chat-min-width));
+
+  /* Toasts */
+  --toastify-color-progress-success: var(--flashio-elements-icon-success);
+  --toastify-color-progress-error: var(--flashio-elements-icon-error);
+
+  /* Terminal */
+  --flashio-elements-terminal-backgroundColor: var(--flashio-terminal-background);
+  --flashio-elements-terminal-textColor: var(--flashio-terminal-foreground);
+  --flashio-elements-terminal-cursorColor: var(--flashio-terminal-foreground);
+  --flashio-elements-terminal-selection-backgroundColor: var(--flashio-terminal-selection-background);
+  --flashio-elements-terminal-color-black: var(--flashio-terminal-black);
+  --flashio-elements-terminal-color-red: var(--flashio-terminal-red);
+  --flashio-elements-terminal-color-green: var(--flashio-terminal-green);
+  --flashio-elements-terminal-color-yellow: var(--flashio-terminal-yellow);
+  --flashio-elements-terminal-color-blue: var(--flashio-terminal-blue);
+  --flashio-elements-terminal-color-magenta: var(--flashio-terminal-magenta);
+  --flashio-elements-terminal-color-cyan: var(--flashio-terminal-cyan);
+  --flashio-elements-terminal-color-white: var(--flashio-terminal-white);
+  --flashio-elements-terminal-color-brightBlack: var(--flashio-terminal-brightBlack);
+  --flashio-elements-terminal-color-brightRed: var(--flashio-terminal-brightRed);
+  --flashio-elements-terminal-color-brightGreen: var(--flashio-terminal-brightGreen);
+  --flashio-elements-terminal-color-brightYellow: var(--flashio-terminal-brightYellow);
+  --flashio-elements-terminal-color-brightBlue: var(--flashio-terminal-brightBlue);
+  --flashio-elements-terminal-color-brightMagenta: var(--flashio-terminal-brightMagenta);
+  --flashio-elements-terminal-color-brightCyan: var(--flashio-terminal-brightCyan);
+  --flashio-elements-terminal-color-brightWhite: var(--flashio-terminal-brightWhite);
+}

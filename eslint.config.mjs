@@ -1,16 +1,46 @@
-import { dirname } from "path";
-import { fileURLToPath } from "url";
-import { FlatCompat } from "@eslint/eslintrc";
+import blitzPlugin from '@blitz/eslint-plugin';
+import { jsFileExtensions } from '@blitz/eslint-plugin/dist/configs/javascript.js';
+import { getNamingConventionRule, tsFileExtensions } from '@blitz/eslint-plugin/dist/configs/typescript.js';
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
-
-const compat = new FlatCompat({
-  baseDirectory: __dirname,
-});
-
-const eslintConfig = [
-  ...compat.extends("next/core-web-vitals", "next/typescript"),
+export default [
+  {
+    ignores: ['**/dist', '**/node_modules', '**/.wrangler', '**/flashio/build'],
+  },
+  ...blitzPlugin.configs.recommended(),
+  {
+    rules: {
+      '@blitz/catch-error-name': 'off',
+      '@typescript-eslint/no-this-alias': 'off',
+      '@typescript-eslint/no-empty-object-type': 'off',
+    },
+  },
+  {
+    files: ['**/*.tsx'],
+    rules: {
+      ...getNamingConventionRule({}, true),
+    },
+  },
+  {
+    files: ['**/*.d.ts'],
+    rules: {
+      '@typescript-eslint/no-empty-object-type': 'off',
+    },
+  },
+  {
+    files: [...tsFileExtensions, ...jsFileExtensions, '**/*.tsx'],
+    ignores: ['functions/*'],
+    rules: {
+      'no-restricted-imports': [
+        'error',
+        {
+          patterns: [
+            {
+              group: ['../'],
+              message: `Relative imports are not allowed. Please use '~/' instead.`,
+            },
+          ],
+        },
+      ],
+    },
+  },
 ];
-
-export default eslintConfig;
