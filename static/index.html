@@ -3,46 +3,98 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Log Analysis AI System</title>
+    <title>Flash.io - Intelligent Log Analysis</title>
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link href="/static/styles.css" rel="stylesheet">
 </head>
-<body class="bg-gray-100">
-    <div class="min-h-screen">
-        <nav class="bg-white shadow-lg">
+<body class="bg-gradient-to-br from-gray-50 to-indigo-50 font-inter">    <div class="min-h-screen backdrop-blur-sm">
+        <!-- Navigation Bar with Enhanced Design -->
+        <nav class="bg-gradient-to-r from-indigo-600 via-purple-600 to-blue-600 shadow-xl border-b border-indigo-200/20">
             <div class="max-w-7xl mx-auto px-4">
                 <div class="flex justify-between h-16">
                     <div class="flex">
                         <div class="flex-shrink-0 flex items-center">
-                            <h1 class="text-xl font-bold text-gray-800">Log Analysis AI</h1>
+                            <div class="text-white flex items-center space-x-3">
+                                <div class="relative">
+                                    <i class="fas fa-bolt text-2xl transform transition-transform duration-300 hover:scale-110"></i>
+                                    <div class="absolute -top-1 -right-1 w-2 h-2 bg-yellow-400 rounded-full animate-pulse"></div>
+                                </div>
+                                <div>
+                                    <h1 class="text-2xl font-bold tracking-tight">Flash.io</h1>
+                                    <p class="text-xs text-indigo-200 -mt-1">Intelligent Log Analysis</p>
+                                </div>
+                            </div>
                         </div>
-                        <div class="hidden md:ml-6 md:flex md:space-x-8">
-                            <a href="#" onclick="showTab('ingest')" class="text-gray-900 inline-flex items-center px-1 pt-1 border-b-2 border-indigo-500 text-sm font-medium">
-                                Ingest Logs
+                        <div class="hidden md:ml-12 md:flex md:space-x-2">
+                            <a href="#" onclick="showTab('ingest')" class="nav-link text-white inline-flex items-center px-4 py-2 rounded-lg border-2 border-transparent hover:border-white/30 hover:bg-white/10 text-sm font-medium transition-all duration-200 ease-in-out transform hover:scale-105">
+                                <i class="fas fa-file-import mr-2 text-indigo-200"></i>
+                                <span>Ingest</span>
                             </a>
-                            <a href="#" onclick="showTab('query')" class="text-gray-500 hover:text-gray-900 inline-flex items-center px-1 pt-1 border-b-2 border-transparent hover:border-gray-300 text-sm font-medium">
-                                Query Logs
+                            <a href="#" onclick="showTab('query')" class="nav-link text-white inline-flex items-center px-4 py-2 rounded-lg border-2 border-transparent hover:border-white/30 hover:bg-white/10 text-sm font-medium transition-all duration-200 ease-in-out transform hover:scale-105">
+                                <i class="fas fa-search mr-2 text-indigo-200"></i>
+                                <span>Query</span>
                             </a>
-                            <a href="#" onclick="showTab('agent')" class="text-gray-500 hover:text-gray-900 inline-flex items-center px-1 pt-1 border-b-2 border-transparent hover:border-gray-300 text-sm font-medium">
-                                Agent State
+                            <a href="#" onclick="showTab('agent')" class="nav-link text-white inline-flex items-center px-4 py-2 rounded-lg border-2 border-transparent hover:border-white/30 hover:bg-white/10 text-sm font-medium transition-all duration-200 ease-in-out transform hover:scale-105">
+                                <i class="fas fa-robot mr-2 text-indigo-200"></i>
+                                <span>Agent</span>
                             </a>
-                            <a href="#" onclick="showTab('database')" class="text-gray-500 hover:text-gray-900 inline-flex items-center px-1 pt-1 border-b-2 border-transparent hover:border-gray-300 text-sm font-medium">
-                                Database Logs
+                            <a href="#" onclick="showTab('database')" class="nav-link text-white inline-flex items-center px-4 py-2 rounded-lg border-2 border-transparent hover:border-white/30 hover:bg-white/10 text-sm font-medium transition-all duration-200 ease-in-out transform hover:scale-105">
+                                <i class="fas fa-database mr-2 text-indigo-200"></i>
+                                <span>Database</span>
                             </a>
-                            <a href="#" onclick="showTab('live')" class="text-gray-500 hover:text-gray-900 inline-flex items-center px-1 pt-1 border-b-2 border-transparent hover:border-gray-300 text-sm font-medium">
-                                Live Logs
+                            <a href="#" onclick="showTab('live')" class="nav-link text-white inline-flex items-center px-4 py-2 rounded-lg border-2 border-transparent hover:border-white/30 hover:bg-white/10 text-sm font-medium transition-all duration-200 ease-in-out transform hover:scale-105">
+                                <i class="fas fa-stream mr-2 text-indigo-200"></i>
+                                <span>Live</span>
+                                <div class="ml-1 w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
                             </a>
                         </div>
                     </div>
+                    <!-- Mobile menu button -->
+                    <div class="md:hidden flex items-center">
+                        <button class="mobile-menu-button text-white hover:text-indigo-200 transition-colors duration-200">
+                            <i class="fas fa-bars text-xl"></i>
+                        </button>
+                    </div>
                 </div>
             </div>
-        </nav>
-
-        <main class="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
+            <!-- Mobile menu -->
+            <div class="md:hidden mobile-menu hidden bg-indigo-700/90 backdrop-blur-sm">
+                <div class="px-2 pt-2 pb-3 space-y-1">
+                    <a href="#" onclick="showTab('ingest')" class="mobile-nav-link block text-white px-3 py-2 rounded-md text-base font-medium hover:bg-white/10 transition-colors duration-200">
+                        <i class="fas fa-file-import mr-2"></i>Ingest Logs
+                    </a>
+                    <a href="#" onclick="showTab('query')" class="mobile-nav-link block text-white px-3 py-2 rounded-md text-base font-medium hover:bg-white/10 transition-colors duration-200">
+                        <i class="fas fa-search mr-2"></i>Query Logs
+                    </a>
+                    <a href="#" onclick="showTab('agent')" class="mobile-nav-link block text-white px-3 py-2 rounded-md text-base font-medium hover:bg-white/10 transition-colors duration-200">
+                        <i class="fas fa-robot mr-2"></i>Agent State
+                    </a>
+                    <a href="#" onclick="showTab('database')" class="mobile-nav-link block text-white px-3 py-2 rounded-md text-base font-medium hover:bg-white/10 transition-colors duration-200">
+                        <i class="fas fa-database mr-2"></i>Database Logs
+                    </a>
+                    <a href="#" onclick="showTab('live')" class="mobile-nav-link block text-white px-3 py-2 rounded-md text-base font-medium hover:bg-white/10 transition-colors duration-200">
+                        <i class="fas fa-stream mr-2"></i>Live Logs
+                    </a>
+                </div>
+            </div>
+        </nav>        <main class="max-w-7xl mx-auto py-8 sm:px-6 lg:px-8">
+            <!-- Ingest Tab with Enhanced UI -->
             <div id="ingest-tab" class="tab-content">
-                <div class="bg-white shadow sm:rounded-lg p-6">
-                    <h2 class="text-lg font-medium text-gray-900">Ingest Log Files</h2>
+                <div class="bg-white/80 backdrop-blur-sm shadow-xl border border-white/20 rounded-2xl p-8 transition-all duration-300 hover:shadow-2xl">
+                    <div class="flex items-center mb-6">
+                        <div class="flex-shrink-0">
+                            <div class="w-12 h-12 bg-gradient-to-r from-indigo-500 to-purple-600 rounded-xl flex items-center justify-center">
+                                <i class="fas fa-file-import text-white text-xl"></i>
+                            </div>
+                        </div>
+                        <div class="ml-4">
+                            <h2 class="text-2xl font-bold text-gray-900">Ingest Log Files</h2>
+                            <p class="text-gray-600">Upload and process your log files for analysis</p>
+                        </div>
+                    </div>
                     <div class="mt-5 grid grid-cols-1 gap-6">
                         <div class="col-span-1">
                             <form id="upload-form" class="space-y-6">
@@ -443,10 +495,41 @@
                 </div>
             </div>
         </main>
+    </div>    <!-- Enhanced Notification System -->
+    <div id="notification" class="fixed top-4 right-4 z-50 transform translate-x-full transition-all duration-500 ease-out">
+        <div class="bg-white border-l-4 border-green-500 rounded-lg shadow-2xl p-4 max-w-sm">
+            <div class="flex items-start">
+                <div class="flex-shrink-0">
+                    <div class="notification-icon w-8 h-8 rounded-full bg-green-100 flex items-center justify-center">
+                        <i class="fas fa-check text-green-600 text-sm"></i>
+                    </div>
+                </div>
+                <div class="ml-3 flex-1">
+                    <div class="notification-content">
+                        <p class="text-sm font-medium text-gray-900" id="notification-title">Success!</p>
+                        <p class="text-sm text-gray-500 mt-1" id="notification-message">Operation completed successfully</p>
+                    </div>
+                </div>
+                <div class="ml-4 flex-shrink-0 flex">
+                    <button class="notification-close text-gray-400 hover:text-gray-600 transition-colors duration-200" onclick="hideNotification()">
+                        <i class="fas fa-times text-sm"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
     </div>
 
-    <div id="notification" class="fixed bottom-4 right-4 bg-green-500 text-white px-4 py-2 rounded-md shadow-lg hidden">
-        <!-- Notification content will be added here -->
+    <!-- Loading Overlay -->
+    <div id="loading-overlay" class="fixed inset-0 bg-gray-900/50 backdrop-blur-sm z-40 hidden flex items-center justify-center">
+        <div class="bg-white rounded-2xl p-8 shadow-2xl max-w-sm w-full mx-4">
+            <div class="text-center">
+                <div class="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-r from-indigo-500 to-purple-600 rounded-full mb-4">
+                    <div class="animate-spin w-8 h-8 border-3 border-white border-t-transparent rounded-full"></div>
+                </div>
+                <h3 class="text-lg font-semibold text-gray-900 mb-2">Processing</h3>
+                <p class="text-gray-600 text-sm">Please wait while we process your request...</p>
+            </div>
+        </div>
     </div>
 
     <script src="/static/app.js"></script>
