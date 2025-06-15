@@ -1,20 +1,50 @@
-from fastapi import FastAPI, Depends, WebSocket, WebSocketDisconnect
+from fastapi import FastAPI, Depends, WebSocket, WebSocketDisconnect, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
-from fastapi.responses import HTMLResponse
+from fastapi.responses import HTMLResponse, JSONResponse
+from fastapi.exception_handlers import http_exception_handler
 import asyncio
 import json
 from datetime import datetime, timedelta
 import random
 from typing import List, Dict, Any
+import traceback
+import logging
 
-from api.routes import logs, queries, credentials, ingest, database
+from api.routes import logs, queries, credentials, ingest, database, alerts, anomalies, correlation, metrics
+
+# Configure logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 app = FastAPI(
     title="Log Analysis AI API",
     description="API for real-time log analysis with AI",
     version="0.1.0"
 )
+
+# Global exception handler
+@app.exception_handler(Exception)
+async def global_exception_handler(request: Request, exc: Exception):
+    """Global exception handler for unhandled errors"""
+    logger.error(f"Unhandled exception on {request.url}: {str(exc)}")
+    logger.error(traceback.format_exc())
+    
+    return JSONResponse(
+        status_code=500,
+        content={
+            "detail": "Internal server error",
+            "error": str(exc),
+            "path": str(request.url)
+        }
+    )
+
+# HTTP exception handler
+@app.exception_handler(HTTPException)
+async def custom_http_exception_handler(request: Request, exc: HTTPException):
+    """Custom HTTP exception handler"""
+    logger.warning(f"HTTP {exc.status_code} on {request.url}: {exc.detail}")
+    return await http_exception_handler(request, exc)
 
 # Add CORS middleware
 app.add_middleware(
@@ -54,6 +84,10 @@ app.include_router(queries.router)
 app.include_router(credentials.router)
 app.include_router(ingest.router)
 app.include_router(database.router)
+app.include_router(alerts.router)
+app.include_router(anomalies.router)
+app.include_router(correlation.router)
+app.include_router(metrics.router)
 
 # Mount static files
 app.mount("/static", StaticFiles(directory="static"), name="static")
