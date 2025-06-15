@@ -28,6 +28,9 @@
 - **Real-time Monitoring**: Need for instant alerts and insights
 - **Context Loss**: Difficulty correlating events across different services
 
+### Demo Video
+https://github.com/user-attachments/assets/dfe8d475-a244-48e9-aabe-198100a36a01
+
 ### 💡 Our Solution
 
 Flash.io leverages state-of-the-art AI to provide:
