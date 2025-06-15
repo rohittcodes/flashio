@@ -9,7 +9,6 @@ import { Messages } from './Messages.client';
 import { SendButton } from './SendButton.client';
 
 import styles from './BaseChat.module.scss';
-import { Link } from '@remix-run/react';
 
 interface BaseChatProps {
   textareaRef?: React.RefObject<HTMLTextAreaElement> | undefined;
@@ -58,49 +57,61 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
     },
     ref,
   ) => {
-    const TEXTAREA_MAX_HEIGHT = chatStarted ? 400 : 200;
-
-    return (
+    const TEXTAREA_MAX_HEIGHT = chatStarted ? 400 : 200;    return (
       <div
         ref={ref}
         className={classNames(
           styles.BaseChat,
-          'relative flex h-full w-full overflow-hidden bg-flashio-elements-background-depth-1',
+          'relative flex h-full w-full overflow-hidden bg-gradient-to-br from-slate-50 via-white to-purple-50 dark:from-slate-900 dark:via-slate-800 dark:to-purple-900',
         )}
         data-chat-visible={showChat}
       >
         <ClientOnly>{() => <Menu />}</ClientOnly>
-        <div ref={scrollRef} className="flex overflow-y-auto w-full h-full">
-          <div className={classNames(styles.Chat, 'flex flex-col flex-grow min-w-[var(--chat-min-width)] h-full')}>            {!chatStarted && (
-              <div id="intro" className="mt-[26vh] max-w-chat mx-auto">
-                <h1 className="text-5xl text-center font-bold text-flashio-elements-textPrimary mb-2">
-                  Welcome to  Flash.io
-                </h1>
-                <p className="mb-6 text-center text-flashio-elements-textSecondary">
-                  Your AI-powered development environment. Create, build, and deploy full-stack applications with ease.
-                </p>
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8 max-w-2xl mx-auto">
-                  <Link className="text-center p-3 bg-flashio-elements-background-depth-2 rounded-lg" hrefLang='/en' to="/templates">
-                    <div className="i-ph:squares-four text-2xl text-flashio-elements-textSecondary mb-2 mx-auto" />
-                    <div className="text-xs text-flashio-elements-textTertiary">Templates</div>
-                  </Link>
-                  <Link className="text-center p-3 bg-flashio-elements-background-depth-2 rounded-lg" to="/snippets">
-                    <div className="i-ph:code text-2xl text-flashio-elements-textSecondary mb-2 mx-auto" />
-                    <div className="text-xs text-flashio-elements-textTertiary">Snippets</div>
-                  </Link>
-                  <Link className="text-center p-3 bg-flashio-elements-background-depth-2 rounded-lg" to="/ai-assistant">
-                    <div className="i-ph:robot text-2xl text-flashio-elements-textSecondary mb-2 mx-auto" />
-                    <div className="text-xs text-flashio-elements-textTertiary">AI Assistant</div>
-                  </Link>
-                  <Link className="text-center p-3 bg-flashio-elements-background-depth-2 rounded-lg" to="/analytics">
-                    <div className="i-ph:chart-bar text-2xl text-flashio-elements-textSecondary mb-2 mx-auto" />
-                    <div className="text-xs text-flashio-elements-textTertiary">Analytics</div>
-                  </Link>
+        <div ref={scrollRef} className="flex overflow-y-auto w-full h-full ml-[280px]">
+          <div className={classNames(styles.Chat, 'flex flex-col flex-grow min-w-[var(--chat-min-width)] h-full px-8')}>
+            {!chatStarted && (
+              <div id="intro" className="mt-12 max-w-4xl mx-auto">
+                <div className="text-center mb-8">
+                  <div className="inline-flex items-center gap-4 mb-4">
+                    <div className="w-16 h-16 bg-gradient-to-br from-purple-500 via-pink-500 to-orange-500 rounded-2xl flex items-center justify-center shadow-2xl">
+                      <span className="text-white font-bold text-2xl">F</span>
+                    </div>
+                    <h1 className="text-6xl font-bold bg-gradient-to-r from-purple-600 via-pink-600 to-orange-600 bg-clip-text text-transparent">
+                      Flash.io
+                    </h1>
+                  </div>
+                  <p className="text-xl text-flashio-elements-textSecondary max-w-2xl mx-auto leading-relaxed">
+                    Your AI-powered development environment. Create, build, and deploy full-stack applications with unprecedented speed and intelligence.
+                  </p>
+                </div>
+                
+                {/* Feature highlights */}
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-6 max-w-4xl mx-auto">
+                  <div className="text-center p-6 bg-gradient-to-br from-white to-purple-50 dark:from-slate-800 dark:to-purple-900 rounded-2xl shadow-lg border border-flashio-elements-borderColor hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
+                    <div className="i-ph:squares-four text-3xl text-purple-500 mb-3 mx-auto" />
+                    <div className="text-sm font-semibold text-flashio-elements-textPrimary mb-1">Templates</div>
+                    <div className="text-xs text-flashio-elements-textTertiary">Quick starts</div>
+                  </div>
+                  <div className="text-center p-6 bg-gradient-to-br from-white to-pink-50 dark:from-slate-800 dark:to-pink-900 rounded-2xl shadow-lg border border-flashio-elements-borderColor hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
+                    <div className="i-ph:code text-3xl text-pink-500 mb-3 mx-auto" />
+                    <div className="text-sm font-semibold text-flashio-elements-textPrimary mb-1">Snippets</div>
+                    <div className="text-xs text-flashio-elements-textTertiary">Code library</div>
+                  </div>
+                  <div className="text-center p-6 bg-gradient-to-br from-white to-orange-50 dark:from-slate-800 dark:to-orange-900 rounded-2xl shadow-lg border border-flashio-elements-borderColor hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
+                    <div className="i-ph:robot text-3xl text-orange-500 mb-3 mx-auto" />
+                    <div className="text-sm font-semibold text-flashio-elements-textPrimary mb-1">AI Assistant</div>
+                    <div className="text-xs text-flashio-elements-textTertiary">Smart coding</div>
+                  </div>
+                  <div className="text-center p-6 bg-gradient-to-br from-white to-blue-50 dark:from-slate-800 dark:to-blue-900 rounded-2xl shadow-lg border border-flashio-elements-borderColor hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
+                    <div className="i-ph:chart-bar text-3xl text-blue-500 mb-3 mx-auto" />
+                    <div className="text-sm font-semibold text-flashio-elements-textPrimary mb-1">Analytics</div>
+                    <div className="text-xs text-flashio-elements-textTertiary">Insights</div>
+                  </div>
                 </div>
               </div>
             )}
             <div
-              className={classNames('pt-6 px-6', {
+              className={classNames('px-6 pt-8', {
                 'h-full flex flex-col': chatStarted,
               })}
             >
@@ -120,10 +131,9 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
                 className={classNames('relative w-full max-w-chat mx-auto z-prompt', {
                   'sticky bottom-0': chatStarted,
                 })}
-              >
-                <div
+              >                <div
                   className={classNames(
-                    'shadow-sm border border-flashio-elements-borderColor bg-flashio-elements-prompt-background backdrop-filter backdrop-blur-[8px] rounded-lg overflow-hidden',
+                    'shadow-xl border-2 border-flashio-elements-borderColor bg-gradient-to-br from-white to-purple-50 dark:from-slate-800 dark:to-purple-900 backdrop-filter backdrop-blur-[12px] rounded-2xl overflow-hidden transition-all duration-300 hover:shadow-2xl hover:border-purple-300',
                   )}
                 >
                   <textarea
@@ -148,7 +158,7 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
                       minHeight: TEXTAREA_MIN_HEIGHT,
                       maxHeight: TEXTAREA_MAX_HEIGHT,
                     }}
-                    placeholder="What do you want to build today?"
+                    placeholder="✨ How can Flash.io transform your idea into reality today?"
                     translate="no"
                   />
                   <ClientOnly>
@@ -203,22 +213,25 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
               </div>
             </div>
             {!chatStarted && (
-              <div id="examples" className="relative w-full max-w-xl mx-auto mt-8 flex justify-center">
-                <div className="flex flex-col space-y-2 [mask-image:linear-gradient(to_bottom,black_0%,transparent_180%)] hover:[mask-image:none]">
-                  {EXAMPLE_PROMPTS.map((examplePrompt, index) => {
-                    return (
-                      <button
-                        key={index}
-                        onClick={(event) => {
-                          sendMessage?.(event, examplePrompt.text);
-                        }}
-                        className="group flex items-center w-full gap-2 justify-center bg-transparent text-flashio-elements-textTertiary hover:text-flashio-elements-textPrimary transition-theme"
-                      >
-                        {examplePrompt.text}
-                        <div className="i-ph:arrow-bend-down-left" />
-                      </button>
-                    );
-                  })}
+              <div id="examples" className="relative w-full max-w-4xl mx-auto mt-8 flex justify-center">
+                <div className="w-full">
+                  <h3 className="text-center text-flashio-elements-textSecondary mb-6 font-medium">Try these popular prompts to get started</h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {EXAMPLE_PROMPTS.map((examplePrompt, index) => {
+                      return (
+                        <button
+                          key={index}
+                          onClick={(event) => {
+                            sendMessage?.(event, examplePrompt.text);
+                          }}
+                          className="group flex items-center justify-between w-full p-4 bg-gradient-to-br from-white to-purple-50 dark:from-slate-800 dark:to-purple-900 border border-flashio-elements-borderColor hover:border-purple-300 rounded-xl text-left text-flashio-elements-textSecondary hover:text-flashio-elements-textPrimary transition-all duration-300 hover:shadow-lg hover:-translate-y-1"
+                        >
+                          <span className="flex-1 text-sm font-medium">{examplePrompt.text}</span>
+                          <div className="i-ph:arrow-right opacity-0 group-hover:opacity-100 transition-opacity duration-300 text-purple-500" />
+                        </button>
+                      );
+                    })}
+                  </div>
                 </div>
               </div>
             )}

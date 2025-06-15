@@ -106,10 +106,9 @@ export const Workbench = memo(({ chatStarted, isStreaming }: WorkspaceProps) => 
         animate={showWorkbench ? 'open' : 'closed'}
         variants={workbenchVariants}
         className="z-workbench"
-      >
-        <div
+      >        <div
           className={classNames(
-            'fixed top-[calc(var(--header-height)+1.5rem)] bottom-6 w-[var(--workbench-inner-width)] mr-4 z-0 transition-[left,width] duration-200 flashio-ease-cubic-bezier',
+            'fixed top-[calc(var(--header-height)+1.5rem)] bottom-6 w-[var(--workbench-inner-width)] mr-6 z-0 transition-[left,width] duration-300 ease-in-out',
             {
               'left-[var(--workbench-left)]': showWorkbench,
               'left-[100%]': !showWorkbench,
@@ -117,24 +116,24 @@ export const Workbench = memo(({ chatStarted, isStreaming }: WorkspaceProps) => 
           )}
         >
           <div className="absolute inset-0 px-6">
-            <div className="h-full flex flex-col bg-flashio-elements-background-depth-2 border border-flashio-elements-borderColor shadow-sm rounded-lg overflow-hidden">
-              <div className="flex items-center px-3 py-2 border-b border-flashio-elements-borderColor">
+            <div className="h-full flex flex-col bg-gradient-to-br from-white to-purple-50 dark:from-slate-800 dark:to-purple-900 border-2 border-bolt-elements-borderColor shadow-2xl rounded-2xl overflow-hidden backdrop-blur-lg">
+              <div className="flex items-center px-4 py-3 border-b border-bolt-elements-borderColor bg-gradient-to-r from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800">
                 <Slider selected={selectedView} options={sliderOptions} setSelected={setSelectedView} />
                 <div className="ml-auto" />
                 {selectedView === 'code' && (
                   <PanelHeaderButton
-                    className="mr-1 text-sm"
+                    className="mr-2 text-sm font-medium px-3 py-2 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-lg hover:from-purple-600 hover:to-pink-600 transition-all duration-300 hover:shadow-lg hover:scale-105"
                     onClick={() => {
                       workbenchStore.toggleTerminal(!workbenchStore.showTerminal.get());
                     }}
                   >
-                    <div className="i-ph:terminal" />
+                    <div className="i-ph:terminal mr-1" />
                     Toggle Terminal
                   </PanelHeaderButton>
                 )}
                 <IconButton
                   icon="i-ph:x-circle"
-                  className="-mr-1"
+                  className="-mr-1 hover:text-red-500 transition-colors duration-300"
                   size="xl"
                   onClick={() => {
                     workbenchStore.showWorkbench.set(false);

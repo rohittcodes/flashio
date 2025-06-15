@@ -10,33 +10,11 @@ import { logger } from '~/utils/logger';
 import { HistoryItem } from './HistoryItem';
 import { binDates } from './date-binning';
 
-const menuVariants = {
-  closed: {
-    opacity: 0,
-    visibility: 'hidden',
-    left: '-150px',
-    transition: {
-      duration: 0.2,
-      ease: cubicEasingFn,
-    },
-  },
-  open: {
-    opacity: 1,
-    visibility: 'initial',
-    left: 0,
-    transition: {
-      duration: 0.2,
-      ease: cubicEasingFn,
-    },
-  },
-} satisfies Variants;
-
 type DialogContent = { type: 'delete'; item: ChatHistoryItem } | null;
 
 export function Menu() {
   const menuRef = useRef<HTMLDivElement>(null);
   const [list, setList] = useState<ChatHistoryItem[]>([]);
-  const [open, setOpen] = useState(false);
   const [dialogContent, setDialogContent] = useState<DialogContent>(null);
 
   const loadEntries = useCallback(() => {
@@ -73,58 +51,38 @@ export function Menu() {
   };
 
   useEffect(() => {
-    if (open) {
-      loadEntries();
-    }
-  }, [open]);
-
-  useEffect(() => {
-    const enterThreshold = 40;
-    const exitThreshold = 40;
-
-    function onMouseMove(event: MouseEvent) {
-      if (event.pageX < enterThreshold) {
-        setOpen(true);
-      }
-
-      if (menuRef.current && event.clientX > menuRef.current.getBoundingClientRect().right + exitThreshold) {
-        setOpen(false);
-      }
-    }
-
-    window.addEventListener('mousemove', onMouseMove);
-
-    return () => {
-      window.removeEventListener('mousemove', onMouseMove);
-    };
+    loadEntries();
   }, []);
 
   return (
-    <motion.div
+    <div
       ref={menuRef}
-      initial="closed"
-      animate={open ? 'open' : 'closed'}
-      variants={menuVariants}
-      className="flex flex-col side-menu fixed top-0 w-[350px] h-full bg-flashio-elements-background-depth-2 border-r rounded-r-3xl border-flashio-elements-borderColor z-sidebar shadow-xl shadow-flashio-elements-sidebar-dropdownShadow text-sm"
-    >
-      <div className="flex items-center h-[var(--header-height)]">{/* Placeholder */}</div>
+      className="flex flex-col side-menu fixed top-0 left-0 w-[280px] h-full bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800 border-r border-flashio-elements-borderColor shadow-2xl text-sm z-sidebar backdrop-blur-lg"
+    >      <div className="flex items-center h-[80px] px-6 border-b border-flashio-elements-borderColor">
+        <div className="flex items-center gap-3">
+          <div className="w-8 h-8 bg-gradient-to-br from-purple-500 to-pink-500 rounded-lg flex items-center justify-center">
+            <span className="text-white font-bold text-sm">F</span>
+          </div>
+          <span className="font-bold text-flashio-elements-textPrimary text-lg">Flash.io</span>
+        </div>
+      </div>
       <div className="flex-1 flex flex-col h-full w-full overflow-hidden">
-        <div className="p-4">
+        <div className="p-5">
           <a
             href="/"
-            className="flex gap-2 items-center bg-flashio-elements-sidebar-buttonBackgroundDefault text-flashio-elements-sidebar-buttonText hover:bg-flashio-elements-sidebar-buttonBackgroundHover rounded-md p-2 transition-theme"
+            className="flex gap-3 items-center bg-flashio-elements-sidebar-buttonBackgroundDefault text-flashio-elements-sidebar-buttonText hover:bg-flashio-elements-sidebar-buttonBackgroundHover rounded-xl p-4 transition-all duration-300 hover:shadow-lg hover:transform hover:scale-105"
           >
-            <span className="inline-block i-flashio:chat scale-110" />
-            Start new chat
+            <span className="inline-block i-flashio:chat scale-125" />
+            <span className="font-semibold">Start new chat</span>
           </a>
         </div>
-        <div className="text-flashio-elements-textPrimary font-medium pl-6 pr-5 my-2">Your Chats</div>
-        <div className="flex-1 overflow-scroll pl-4 pr-5 pb-5">
-          {list.length === 0 && <div className="pl-2 text-flashio-elements-textTertiary">No previous conversations</div>}
+        <div className="text-flashio-elements-textPrimary font-semibold pl-6 pr-5 my-3 text-sm uppercase tracking-wide">Your Chats</div>
+        <div className="flex-1 overflow-scroll pl-5 pr-5 pb-5">
+          {list.length === 0 && <div className="pl-2 text-flashio-elements-textTertiary text-center py-8">No previous conversations</div>}
           <DialogRoot open={dialogContent !== null}>
             {binDates(list).map(({ category, items }) => (
-              <div key={category} className="mt-4 first:mt-0 space-y-1">
-                <div className="text-flashio-elements-textTertiary sticky top-0 z-1 bg-flashio-elements-background-depth-2 pl-2 pt-2 pb-1">
+              <div key={category} className="mt-6 first:mt-0 space-y-2">
+                <div className="text-flashio-elements-textTertiary sticky top-0 z-1 bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800 pl-2 pt-2 pb-1 text-xs uppercase tracking-wide font-medium">
                   {category}
                 </div>
                 {items.map((item) => (
@@ -163,10 +121,14 @@ export function Menu() {
             </Dialog>
           </DialogRoot>
         </div>
-        <div className="flex items-center border-t border-flashio-elements-borderColor p-4">
-          <ThemeSwitch className="ml-auto" />
+        <div className="flex items-center justify-between border-t border-flashio-elements-borderColor p-5 bg-gradient-to-r from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800">
+          <div className="flex items-center gap-2 text-flashio-elements-textSecondary text-xs">
+            <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+            Online
+          </div>
+          <ThemeSwitch />
         </div>
       </div>
-    </motion.div>
+    </div>
   );
 }

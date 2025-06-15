@@ -5,7 +5,7 @@ import { Chat } from '~/components/chat/Chat.client';
 import { Header } from '~/components/header/Header';
 
 export const meta: MetaFunction = () => {
-  return [{ title: 'CodeCraft' }, { name: 'description', content: 'AI-powered development environment for creating full-stack applications' }];
+  return [{ title: 'Flash.io' }, { name: 'description', content: 'AI-powered development environment for creating full-stack applications' }];
 };
 
 export const loader = () => json({});

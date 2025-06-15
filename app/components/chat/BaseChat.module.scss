@@ -1,7 +1,7 @@
 .BaseChat {
   &[data-chat-visible='false'] {
-    --workbench-inner-width: 100%;
-    --workbench-left: 0;
+    --workbench-inner-width: calc(100% - 280px);
+    --workbench-left: 280px;
 
     .Chat {
       --at-apply: flashio-ease-cubic-bezier;
@@ -16,4 +16,5 @@
 
 .Chat {
   opacity: 1;
+  background: linear-gradient(135deg, transparent 0%, rgba(139, 92, 246, 0.02) 100%);
 }

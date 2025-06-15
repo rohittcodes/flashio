@@ -8,6 +8,7 @@ import { CodeSnippetLibrary } from '~/components/snippets/CodeSnippetLibrary';
 import { ProjectManager } from '~/components/projects/ProjectManager';
 import { AIAssistant } from '~/components/ai/AIAssistant';
 import { ProjectStatsModal } from '~/components/stats/ProjectStatsModal';
+import { ThemeCustomizer } from '~/components/theme/ThemeCustomizer';
 
 interface HeaderActionButtonsProps {}
 
@@ -19,6 +20,7 @@ export function HeaderActionButtons({}: HeaderActionButtonsProps) {
   const [showProjects, setShowProjects] = useState(false);
   const [showAIAssistant, setShowAIAssistant] = useState(false);
   const [showStats, setShowStats] = useState(false);
+  const [showThemeCustomizer, setShowThemeCustomizer] = useState(false);
 
   const canHideChat = showWorkbench || !showChat;
 
@@ -89,6 +91,13 @@ export function HeaderActionButtons({}: HeaderActionButtonsProps) {
           <div className="i-ph:chart-bar text-sm" />
         </Button>
 
+        <Button
+          title="Theme Customizer"
+          onClick={() => setShowThemeCustomizer(true)}
+        >
+          <div className="i-ph:palette text-sm" />
+        </Button>
+
         <div className="w-[1px] bg-flashio-elements-borderColor h-6 mx-1" />
 
         {/* Original Chat/Workbench Toggle */}
@@ -152,6 +161,12 @@ export function HeaderActionButtons({}: HeaderActionButtonsProps) {
       {showStats && (
         <ProjectStatsModal
           onClose={() => setShowStats(false)}
+        />
+      )}
+
+      {showThemeCustomizer && (
+        <ThemeCustomizer
+          onClose={() => setShowThemeCustomizer(false)}
         />
       )}
     </>

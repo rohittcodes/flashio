@@ -1,74 +1,71 @@
 /* Color Tokens Light Theme */
 :root,
 :root[data-theme='light'] {
-  --flashio-elements-borderColor: theme('colors.alpha.gray.10');
-  --flashio-elements-borderColorActive: theme('colors.accent.600');
+  --flashio-elements-borderColor: rgba(139, 92, 246, 0.15);
+  --flashio-elements-borderColorActive: #8b5cf6;
 
-  --flashio-elements-bg-depth-1: theme('colors.white');
-  --flashio-elements-bg-depth-2: theme('colors.gray.50');
-  --flashio-elements-bg-depth-3: theme('colors.gray.200');
-  --flashio-elements-bg-depth-4: theme('colors.alpha.gray.5');
+  --flashio-elements-bg-depth-1: linear-gradient(135deg, #fdfbff 0%, #f8fafc 100%);
+  --flashio-elements-bg-depth-2: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%);
+  --flashio-elements-bg-depth-3: linear-gradient(135deg, #e2e8f0 0%, #cbd5e1 100%);
+  --flashio-elements-bg-depth-4: rgba(139, 92, 246, 0.05);
 
-  --flashio-elements-textPrimary: theme('colors.gray.950');
-  --flashio-elements-textSecondary: theme('colors.gray.600');
-  --flashio-elements-textTertiary: theme('colors.gray.500');
+  --flashio-elements-textPrimary: #1e293b;
+  --flashio-elements-textSecondary: #475569;
+  --flashio-elements-textTertiary: #64748b;
+  --flashio-elements-code-background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+  --flashio-elements-code-text: #1e293b;
 
-  --flashio-elements-code-background: theme('colors.gray.100');
-  --flashio-elements-code-text: theme('colors.gray.950');
+  --flashio-elements-button-primary-background: linear-gradient(135deg, #8b5cf6 0%, #a855f7 100%);
+  --flashio-elements-button-primary-backgroundHover: linear-gradient(135deg, #7c3aed 0%, #9333ea 100%);
+  --flashio-elements-button-primary-text: #ffffff;
 
-  --flashio-elements-button-primary-background: theme('colors.alpha.accent.10');
-  --flashio-elements-button-primary-backgroundHover: theme('colors.alpha.accent.20');
-  --flashio-elements-button-primary-text: theme('colors.accent.500');
+  --flashio-elements-button-secondary-background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+  --flashio-elements-button-secondary-backgroundHover: linear-gradient(135deg, #e2e8f0 0%, #cbd5e1 100%);
+  --flashio-elements-button-secondary-text: #475569;
 
-  --flashio-elements-button-secondary-background: theme('colors.alpha.gray.5');
-  --flashio-elements-button-secondary-backgroundHover: theme('colors.alpha.gray.10');
-  --flashio-elements-button-secondary-text: theme('colors.gray.950');
+  --flashio-elements-button-danger-background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+  --flashio-elements-button-danger-backgroundHover: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
+  --flashio-elements-button-danger-text: #ffffff;
+  --flashio-elements-item-contentDefault: #64748b;
+  --flashio-elements-item-contentActive: #1e293b;
+  --flashio-elements-item-contentAccent: #8b5cf6;
+  --flashio-elements-item-contentDanger: #ef4444;
+  --flashio-elements-item-backgroundDefault: rgba(139, 92, 246, 0);
+  --flashio-elements-item-backgroundActive: rgba(139, 92, 246, 0.1);
+  --flashio-elements-item-backgroundAccent: rgba(139, 92, 246, 0.15);
+  --flashio-elements-item-backgroundDanger: rgba(239, 68, 68, 0.1);
 
-  --flashio-elements-button-danger-background: theme('colors.alpha.red.10');
-  --flashio-elements-button-danger-backgroundHover: theme('colors.alpha.red.20');
-  --flashio-elements-button-danger-text: theme('colors.red.500');
+  --flashio-elements-loader-background: rgba(139, 92, 246, 0.1);
+  --flashio-elements-loader-progress: #8b5cf6;
 
-  --flashio-elements-item-contentDefault: theme('colors.alpha.gray.50');
-  --flashio-elements-item-contentActive: theme('colors.gray.950');
-  --flashio-elements-item-contentAccent: theme('colors.accent.700');
-  --flashio-elements-item-contentDanger: theme('colors.red.500');
-  --flashio-elements-item-backgroundDefault: rgba(0, 0, 0, 0);
-  --flashio-elements-item-backgroundActive: theme('colors.alpha.gray.5');
-  --flashio-elements-item-backgroundAccent: theme('colors.alpha.accent.10');
-  --flashio-elements-item-backgroundDanger: theme('colors.alpha.red.10');
-
-  --flashio-elements-loader-background: theme('colors.alpha.gray.10');
-  --flashio-elements-loader-progress: theme('colors.accent.500');
-
-  --flashio-elements-artifacts-background: theme('colors.white');
-  --flashio-elements-artifacts-backgroundHover: theme('colors.alpha.gray.2');
+  --flashio-elements-artifacts-background: linear-gradient(135deg, #ffffff 0%, #fdfbff 100%);
+  --flashio-elements-artifacts-backgroundHover: rgba(139, 92, 246, 0.05);
   --flashio-elements-artifacts-borderColor: var(--flashio-elements-borderColor);
-  --flashio-elements-artifacts-inlineCode-background: theme('colors.gray.100');
+  --flashio-elements-artifacts-inlineCode-background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
   --flashio-elements-artifacts-inlineCode-text: var(--flashio-elements-textPrimary);
 
-  --flashio-elements-actions-background: theme('colors.white');
-  --flashio-elements-actions-code-background: theme('colors.gray.800');
+  --flashio-elements-actions-background: linear-gradient(135deg, #ffffff 0%, #fdfbff 100%);
+  --flashio-elements-actions-code-background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+  --flashio-elements-messages-background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+  --flashio-elements-messages-linkColor: #8b5cf6;
+  --flashio-elements-messages-code-background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+  --flashio-elements-messages-inlineCode-background: linear-gradient(135deg, #e2e8f0 0%, #cbd5e1 100%);
+  --flashio-elements-messages-inlineCode-text: #1e293b;
 
-  --flashio-elements-messages-background: theme('colors.gray.100');
-  --flashio-elements-messages-linkColor: theme('colors.accent.500');
-  --flashio-elements-messages-code-background: theme('colors.gray.800');
-  --flashio-elements-messages-inlineCode-background: theme('colors.gray.200');
-  --flashio-elements-messages-inlineCode-text: theme('colors.gray.800');
+  --flashio-elements-icon-success: #10b981;
+  --flashio-elements-icon-error: #ef4444;
+  --flashio-elements-icon-primary: #1e293b;
+  --flashio-elements-icon-secondary: #475569;
+  --flashio-elements-icon-tertiary: #64748b;
 
-  --flashio-elements-icon-success: theme('colors.green.500');
-  --flashio-elements-icon-error: theme('colors.red.500');
-  --flashio-elements-icon-primary: theme('colors.gray.950');
-  --flashio-elements-icon-secondary: theme('colors.gray.600');
-  --flashio-elements-icon-tertiary: theme('colors.gray.500');
+  --flashio-elements-dividerColor: rgba(139, 92, 246, 0.15);
 
-  --flashio-elements-dividerColor: theme('colors.gray.100');
+  --flashio-elements-prompt-background: rgba(255, 255, 255, 0.9);
 
-  --flashio-elements-prompt-background: theme('colors.alpha.white.80');
-
-  --flashio-elements-sidebar-dropdownShadow: theme('colors.alpha.gray.10');
-  --flashio-elements-sidebar-buttonBackgroundDefault: theme('colors.alpha.accent.10');
-  --flashio-elements-sidebar-buttonBackgroundHover: theme('colors.alpha.accent.20');
-  --flashio-elements-sidebar-buttonText: theme('colors.accent.700');
+  --flashio-elements-sidebar-dropdownShadow: rgba(139, 92, 246, 0.1);
+  --flashio-elements-sidebar-buttonBackgroundDefault: linear-gradient(135deg, #8b5cf6 0%, #a855f7 100%);
+  --flashio-elements-sidebar-buttonBackgroundHover: linear-gradient(135deg, #7c3aed 0%, #9333ea 100%);
+  --flashio-elements-sidebar-buttonText: #ffffff;
 
   --flashio-elements-preview-addressBar-background: theme('colors.gray.100');
   --flashio-elements-preview-addressBar-backgroundHover: theme('colors.alpha.gray.5');
@@ -105,34 +102,32 @@
 }
 
 /* Color Tokens Dark Theme */
-:root,
 :root[data-theme='dark'] {
-  --flashio-elements-borderColor: theme('colors.alpha.white.10');
-  --flashio-elements-borderColorActive: theme('colors.accent.500');
+  --flashio-elements-borderColor: rgba(139, 92, 246, 0.25);
+  --flashio-elements-borderColorActive: #a855f7;
 
-  --flashio-elements-bg-depth-1: theme('colors.gray.950');
-  --flashio-elements-bg-depth-2: theme('colors.gray.900');
-  --flashio-elements-bg-depth-3: theme('colors.gray.800');
-  --flashio-elements-bg-depth-4: theme('colors.alpha.white.5');
+  --flashio-elements-bg-depth-1: linear-gradient(135deg, #0f0f23 0%, #1a1a2e 100%);
+  --flashio-elements-bg-depth-2: linear-gradient(135deg, #16213e 0%, #1e293b 100%);
+  --flashio-elements-bg-depth-3: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+  --flashio-elements-bg-depth-4: rgba(139, 92, 246, 0.1);
 
-  --flashio-elements-textPrimary: theme('colors.white');
-  --flashio-elements-textSecondary: theme('colors.gray.400');
-  --flashio-elements-textTertiary: theme('colors.gray.500');
+  --flashio-elements-textPrimary: #f8fafc;
+  --flashio-elements-textSecondary: #cbd5e1;
+  --flashio-elements-textTertiary: #94a3b8;
+  --flashio-elements-code-background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+  --flashio-elements-code-text: #f8fafc;
 
-  --flashio-elements-code-background: theme('colors.gray.800');
-  --flashio-elements-code-text: theme('colors.white');
+  --flashio-elements-button-primary-background: linear-gradient(135deg, #8b5cf6 0%, #a855f7 100%);
+  --flashio-elements-button-primary-backgroundHover: linear-gradient(135deg, #7c3aed 0%, #9333ea 100%);
+  --flashio-elements-button-primary-text: #ffffff;
 
-  --flashio-elements-button-primary-background: theme('colors.alpha.accent.10');
-  --flashio-elements-button-primary-backgroundHover: theme('colors.alpha.accent.20');
-  --flashio-elements-button-primary-text: theme('colors.accent.500');
+  --flashio-elements-button-secondary-background: linear-gradient(135deg, #334155 0%, #475569 100%);
+  --flashio-elements-button-secondary-backgroundHover: linear-gradient(135deg, #475569 0%, #64748b 100%);
+  --flashio-elements-button-secondary-text: #f8fafc;
 
-  --flashio-elements-button-secondary-background: theme('colors.alpha.white.5');
-  --flashio-elements-button-secondary-backgroundHover: theme('colors.alpha.white.10');
-  --flashio-elements-button-secondary-text: theme('colors.white');
-
-  --flashio-elements-button-danger-background: theme('colors.alpha.red.10');
-  --flashio-elements-button-danger-backgroundHover: theme('colors.alpha.red.20');
-  --flashio-elements-button-danger-text: theme('colors.red.500');
+  --flashio-elements-button-danger-background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+  --flashio-elements-button-danger-backgroundHover: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
+  --flashio-elements-button-danger-text: #ffffff;
 
   --flashio-elements-item-contentDefault: theme('colors.alpha.white.50');
   --flashio-elements-item-contentActive: theme('colors.white');
@@ -216,12 +211,13 @@
  * Hierarchy: Element Token -> (Element Token | Color Tokens) -> Primitives
  */
 :root {
-  --header-height: 54px;
-  --chat-max-width: 37rem;
-  --chat-min-width: 640px;
-  --workbench-width: min(calc(100% - var(--chat-min-width)), 1536px);
+  --header-height: 80px;
+  --sidebar-width: 280px;
+  --chat-max-width: 42rem;
+  --chat-min-width: 680px;
+  --workbench-width: min(calc(100% - var(--chat-min-width) - var(--sidebar-width)), 1536px);
   --workbench-inner-width: var(--workbench-width);
-  --workbench-left: calc(100% - var(--workbench-width));
+  --workbench-left: calc(var(--sidebar-width) + var(--chat-min-width));
 
   /* Toasts */
   --toastify-color-progress-success: var(--flashio-elements-icon-success);

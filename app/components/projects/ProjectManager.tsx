@@ -25,7 +25,7 @@ export function ProjectManager({ onSelectProject, onClose }: ProjectManagerProps
 
   // Load projects from localStorage on component mount
   useEffect(() => {
-    const savedProjects = localStorage.getItem('codecraft_projects');
+    const savedProjects = localStorage.getItem('flashio_projects');
     if (savedProjects) {
       const parsedProjects = JSON.parse(savedProjects).map((p: any) => ({
         ...p,
@@ -69,7 +69,7 @@ export function ProjectManager({ onSelectProject, onClose }: ProjectManagerProps
 
   // Save projects to localStorage whenever projects change
   useEffect(() => {
-    localStorage.setItem('codecraft_projects', JSON.stringify(projects));
+    localStorage.setItem('flashio_projects', JSON.stringify(projects));
   }, [projects]);
 
   const filteredAndSortedProjects = projects

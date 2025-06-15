@@ -41,7 +41,7 @@ export const links: LinksFunction = () => [
 const inlineThemeCode = stripIndents`
   setTutorialKitTheme();
   function setTutorialKitTheme() {
-    let theme = localStorage.getItem('codecraft_theme');
+    let theme = localStorage.getItem('flashio_theme');
 
     if (!theme) {
       theme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
