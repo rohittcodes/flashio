@@ -1,30 +1,13 @@
-logs
-*.log
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-pnpm-debug.log*
-lerna-debug.log*
+# Python-generated files
+__pycache__/
+*.py[oc]
+build/
+dist/
+wheels/
+*.egg-info
 
-node_modules
-dist
-dist-ssr
-*.local
+# Virtual environments
+.venv
 
-.vscode/*
-!.vscode/launch.json
-!.vscode/extensions.json
-.idea
-.DS_Store
-*.suo
-*.ntvs*
-*.njsproj
-*.sln
-*.sw?
-
-/.cache
-/build
-.env*
-*.vars
-.wrangler
-_worker.bundle
+.env
+chroma_db/
