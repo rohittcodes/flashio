@@ -27,25 +27,37 @@
                                     <p class="text-xs text-indigo-200 -mt-1">Intelligent Log Analysis</p>
                                 </div>
                             </div>
-                        </div>
-                        <div class="hidden md:ml-12 md:flex md:space-x-2">
-                            <a href="#" onclick="showTab('ingest')" class="nav-link text-white inline-flex items-center px-4 py-2 rounded-lg border-2 border-transparent hover:border-white/30 hover:bg-white/10 text-sm font-medium transition-all duration-200 ease-in-out transform hover:scale-105">
+                        </div>                        <div class="hidden md:ml-12 md:flex md:space-x-2">
+                            <a href="#" onclick="showTab('ingest')" class="nav-link text-white inline-flex items-center px-4 py-2 rounded-lg border-2 border-transparent text-sm font-medium transition-all duration-200 ease-in-out transform hover:scale-105">
                                 <i class="fas fa-file-import mr-2 text-indigo-200"></i>
-                                <span>Ingest</span>
+                                <span style="color: white;">Ingest</span>
                             </a>
-                            <a href="#" onclick="showTab('query')" class="nav-link text-white inline-flex items-center px-4 py-2 rounded-lg border-2 border-transparent hover:border-white/30 hover:bg-white/10 text-sm font-medium transition-all duration-200 ease-in-out transform hover:scale-105">
+                            <a href="#" onclick="showTab('query')" class="nav-link text-white inline-flex items-center px-4 py-2 rounded-lg border-2 border-transparent text-sm font-medium transition-all duration-200 ease-in-out transform hover:scale-105">
                                 <i class="fas fa-search mr-2 text-indigo-200"></i>
-                                <span>Query</span>
+                                <span style="color: white;">Query</span>
                             </a>
-                            <a href="#" onclick="showTab('agent')" class="nav-link text-white inline-flex items-center px-4 py-2 rounded-lg border-2 border-transparent hover:border-white/30 hover:bg-white/10 text-sm font-medium transition-all duration-200 ease-in-out transform hover:scale-105">
+                            <a href="#" onclick="showTab('agent')" class="nav-link text-white inline-flex items-center px-4 py-2 rounded-lg border-2 border-transparent text-sm font-medium transition-all duration-200 ease-in-out transform hover:scale-105">
                                 <i class="fas fa-robot mr-2 text-indigo-200"></i>
-                                <span>Agent</span>
+                                <span style="color: white;"></span>Agent</span>
                             </a>
-                            <a href="#" onclick="showTab('database')" class="nav-link text-white inline-flex items-center px-4 py-2 rounded-lg border-2 border-transparent hover:border-white/30 hover:bg-white/10 text-sm font-medium transition-all duration-200 ease-in-out transform hover:scale-105">
+                            <a href="#" onclick="showTab('dashboard')" class="nav-link text-white inline-flex items-center px-4 py-2 rounded-lg border-2 border-transparent text-sm font-medium transition-all duration-200 ease-in-out transform hover:scale-105">
+                                <i class="fas fa-tachometer-alt mr-2 text-indigo-200"></i>
+                                <span style="color: white;">Dashboard</span>
+                            </a>
+                            <a href="#" onclick="showTab('alerts')" class="nav-link text-white inline-flex items-center px-4 py-2 rounded-lg border-2 border-transparent text-sm font-medium transition-all duration-200 ease-in-out transform hover:scale-105">
+                                <i class="fas fa-exclamation-triangle mr-2 text-indigo-200"></i>
+                                <span style="color: white;"></span>>Alerts</span>
+                                <span id="alert-count" class="ml-1 px-2 py-1 bg-red-500 text-white text-xs rounded-full hidden">0</span>
+                            </a>
+                            <a href="#" onclick="showTab('anomalies')" class="nav-link text-white inline-flex items-center px-4 py-2 rounded-lg border-2 border-transparent text-sm font-medium transition-all duration-200 ease-in-out transform hover:scale-105">
+                                <i class="fas fa-chart-line mr-2 text-indigo-200"></i>
+                                <span>Anomalies</span>
+                            </a>
+                            <a href="#" onclick="showTab('database')" class="nav-link text-white inline-flex items-center px-4 py-2 rounded-lg border-2 border-transparent text-sm font-medium transition-all duration-200 ease-in-out transform hover:scale-105">
                                 <i class="fas fa-database mr-2 text-indigo-200"></i>
                                 <span>Database</span>
                             </a>
-                            <a href="#" onclick="showTab('live')" class="nav-link text-white inline-flex items-center px-4 py-2 rounded-lg border-2 border-transparent hover:border-white/30 hover:bg-white/10 text-sm font-medium transition-all duration-200 ease-in-out transform hover:scale-105">
+                            <a href="#" onclick="showTab('live')" class="nav-link text-white inline-flex items-center px-4 py-2 rounded-lg border-2 border-transparent text-sm font-medium transition-all duration-200 ease-in-out transform hover:scale-105">
                                 <i class="fas fa-stream mr-2 text-indigo-200"></i>
                                 <span>Live</span>
                                 <div class="ml-1 w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
@@ -59,8 +71,7 @@
                         </button>
                     </div>
                 </div>
-            </div>
-            <!-- Mobile menu -->
+            </div>            <!-- Mobile menu -->
             <div class="md:hidden mobile-menu hidden bg-indigo-700/90 backdrop-blur-sm">
                 <div class="px-2 pt-2 pb-3 space-y-1">
                     <a href="#" onclick="showTab('ingest')" class="mobile-nav-link block text-white px-3 py-2 rounded-md text-base font-medium hover:bg-white/10 transition-colors duration-200">
@@ -71,6 +82,15 @@
                     </a>
                     <a href="#" onclick="showTab('agent')" class="mobile-nav-link block text-white px-3 py-2 rounded-md text-base font-medium hover:bg-white/10 transition-colors duration-200">
                         <i class="fas fa-robot mr-2"></i>Agent State
+                    </a>
+                    <a href="#" onclick="showTab('dashboard')" class="mobile-nav-link block text-white px-3 py-2 rounded-md text-base font-medium hover:bg-white/10 transition-colors duration-200">
+                        <i class="fas fa-tachometer-alt mr-2"></i>Dashboard
+                    </a>
+                    <a href="#" onclick="showTab('alerts')" class="mobile-nav-link block text-white px-3 py-2 rounded-md text-base font-medium hover:bg-white/10 transition-colors duration-200">
+                        <i class="fas fa-exclamation-triangle mr-2"></i>Alerts
+                    </a>
+                    <a href="#" onclick="showTab('anomalies')" class="mobile-nav-link block text-white px-3 py-2 rounded-md text-base font-medium hover:bg-white/10 transition-colors duration-200">
+                        <i class="fas fa-chart-line mr-2"></i>Anomalies
                     </a>
                     <a href="#" onclick="showTab('database')" class="mobile-nav-link block text-white px-3 py-2 rounded-md text-base font-medium hover:bg-white/10 transition-colors duration-200">
                         <i class="fas fa-database mr-2"></i>Database Logs
@@ -120,7 +140,7 @@
                                                 </label>
                                                 <p class="pl-1">or drag and drop</p>
                                             </div>
-                                            <p class="text-xs text-gray-500">Any log file up to 50MB</p>
+                                            <p class="text-xs text-white">Any log file up to 50MB</p>
                                             <p id="selected-filename" class="text-sm text-gray-600 mt-2 hidden"></p>
                                         </div>
                                     </div>
@@ -212,21 +232,21 @@
                                 </button>
                                 <div id="model-selector-dropdown" class="hidden origin-top-right absolute right-0 mt-2 w-64 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 focus:outline-none z-10">
                                     <div class="py-1" role="menu" aria-orientation="vertical">
-                                        <div class="px-4 py-2 text-xs text-gray-500 font-semibold border-b">Google AI</div>
+                                        <div class="px-4 py-2 text-xs text-white font-semibold border-b">Google AI</div>
                                         <button class="model-option block px-4 py-2 text-sm w-full text-left text-gray-700 hover:bg-gray-100" data-provider="google" data-model="gemini-1.5-pro">Gemini 1.5 Pro</button>
                                         <button class="model-option block px-4 py-2 text-sm w-full text-left text-gray-700 hover:bg-gray-100" data-provider="google" data-model="gemini-pro">Gemini Pro</button>
                                         
-                                        <div class="px-4 py-2 text-xs text-gray-500 font-semibold border-b">OpenAI</div>
+                                        <div class="px-4 py-2 text-xs text-white font-semibold border-b">OpenAI</div>
                                         <button class="model-option block px-4 py-2 text-sm w-full text-left text-gray-700 hover:bg-gray-100" data-provider="openai" data-model="gpt-4o">GPT-4o</button>
                                         <button class="model-option block px-4 py-2 text-sm w-full text-left text-gray-700 hover:bg-gray-100" data-provider="openai" data-model="gpt-4-turbo">GPT-4 Turbo</button>
                                         <button class="model-option block px-4 py-2 text-sm w-full text-left text-gray-700 hover:bg-gray-100" data-provider="openai" data-model="gpt-3.5-turbo">GPT-3.5 Turbo</button>
                                         
-                                        <div class="px-4 py-2 text-xs text-gray-500 font-semibold border-b">Anthropic</div>
+                                        <div class="px-4 py-2 text-xs text-white font-semibold border-b">Anthropic</div>
                                         <button class="model-option block px-4 py-2 text-sm w-full text-left text-gray-700 hover:bg-gray-100" data-provider="anthropic" data-model="claude-3-opus-20240229">Claude 3 Opus</button>
                                         <button class="model-option block px-4 py-2 text-sm w-full text-left text-gray-700 hover:bg-gray-100" data-provider="anthropic" data-model="claude-3-sonnet-20240229">Claude 3 Sonnet</button>
                                         <button class="model-option block px-4 py-2 text-sm w-full text-left text-gray-700 hover:bg-gray-100" data-provider="anthropic" data-model="claude-3-haiku-20240307">Claude 3 Haiku</button>
                                         
-                                        <div class="px-4 py-2 text-xs text-gray-500 font-semibold border-b">Groq</div>
+                                        <div class="px-4 py-2 text-xs text-white font-semibold border-b">Groq</div>
                                         <button class="model-option block px-4 py-2 text-sm w-full text-left text-gray-700 hover:bg-gray-100" data-provider="groq" data-model="llama3-70b-8192">Llama 3 70B</button>
                                         <button class="model-option block px-4 py-2 text-sm w-full text-left text-gray-700 hover:bg-gray-100" data-provider="groq" data-model="llama3-8b-8192">Llama 3 8B</button>
                                         <button class="model-option block px-4 py-2 text-sm w-full text-left text-gray-700 hover:bg-gray-100" data-provider="groq" data-model="mixtral-8x7b-32768">Mixtral 8x7B</button>
@@ -251,7 +271,7 @@
                                     <div id="agent-status-indicator" class="h-3 w-3 rounded-full bg-green-500 mr-2"></div>
                                     <span id="agent-status-text" class="text-sm font-medium">Active</span>
                                 </div>
-                                <div class="text-sm text-gray-500">
+                                <div class="text-sm text-white">
                                     <p>Last activity: <span id="agent-last-activity">Now</span></p>
                                     <p>Memory usage: <span id="agent-memory-usage">0</span> stored contexts</p>
                                 </div>
@@ -292,7 +312,7 @@
                     <div class="mt-6">
                         <h3 class="text-base font-medium text-gray-900 mb-4">Agent Findings Timeline</h3>
                         <div id="findings-timeline" class="space-y-4">
-                            <div class="text-sm text-gray-500 text-center py-6">
+                            <div class="text-sm text-white text-center py-6">
                                 Loading agent findings...
                             </div>
                         </div>
@@ -332,7 +352,7 @@
                                     <div id="uri-field">
                                         <label class="block text-sm font-medium text-gray-700">Connection URI</label>
                                         <input type="text" name="uri" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" placeholder="e.g., postgresql://user:pass@localhost:5432/db">
-                                        <p class="text-xs text-gray-500 mt-1">Connection URI format: [db_type]://[username]:[password]@[host]:[port]/[database_name]</p>
+                                        <p class="text-xs text-white mt-1">Connection URI format: [db_type]://[username]:[password]@[host]:[port]/[database_name]</p>
                                     </div>
                                     
                                     <div id="detailed-connection-fields" class="hidden space-y-4 mt-4">
@@ -379,7 +399,7 @@
                                 <div id="table-browser-section" class="hidden mt-4 p-4 bg-gray-50 rounded-md">
                                     <h3 class="text-sm font-medium text-gray-700 mb-2">Available Tables</h3>
                                     <div id="tables-list" class="max-h-40 overflow-y-auto">
-                                        <p class="text-sm text-gray-500 text-center py-4">Click "Browse Tables" to retrieve available tables.</p>
+                                        <p class="text-sm text-white text-center py-4">Click "Browse Tables" to retrieve available tables.</p>
                                     </div>
                                 </div>
                                 
@@ -393,7 +413,7 @@
                                             </button>
                                         </div>
                                     </div>
-                                    <p class="text-xs text-gray-500 mt-1">Specify a SQL query that fetches logs or just provide a table name where logs are stored.</p>
+                                    <p class="text-xs text-white mt-1">Specify a SQL query that fetches logs or just provide a table name where logs are stored.</p>
                                 </div>
                                 
                                 <div>
@@ -405,19 +425,19 @@
                                     <label class="block text-sm font-medium text-gray-700">Field Mappings (optional)</label>
                                     <div class="mt-2 grid grid-cols-2 gap-3">
                                         <div>
-                                            <label class="block text-xs text-gray-500">Timestamp Column</label>
+                                            <label class="block text-xs text-white">Timestamp Column</label>
                                             <input type="text" name="timestamp_field" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" placeholder="e.g., created_at">
                                         </div>
                                         <div>
-                                            <label class="block text-xs text-gray-500">Message Column</label>
+                                            <label class="block text-xs text-white">Message Column</label>
                                             <input type="text" name="message_field" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" placeholder="e.g., log_message">
                                         </div>
                                         <div>
-                                            <label class="block text-xs text-gray-500">Level Column</label>
+                                            <label class="block text-xs text-white">Level Column</label>
                                             <input type="text" name="level_field" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" placeholder="e.g., severity">
                                         </div>
                                         <div>
-                                            <label class="block text-xs text-gray-500">Service Column</label>
+                                            <label class="block text-xs text-white">Service Column</label>
                                             <input type="text" name="service_field" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" placeholder="e.g., application">
                                         </div>
                                     </div>
@@ -429,7 +449,7 @@
                                     </div>
                                     <div class="ml-3 text-sm">
                                         <label for="save-connection" class="font-medium text-gray-700">Save connection for future use</label>
-                                        <p class="text-gray-500">Connection details will be encrypted and stored locally.</p>
+                                        <p class="text-white">Connection details will be encrypted and stored locally.</p>
                                     </div>
                                 </div>
                                 
@@ -449,7 +469,7 @@
                         <div id="saved-connections" class="mt-6">
                             <h3 class="text-base font-medium text-gray-900 mb-3">Saved Connections</h3>
                             <div id="connections-list" class="bg-gray-50 rounded-md p-4">
-                                <p class="text-sm text-gray-500 text-center">No saved connections found.</p>
+                                <p class="text-sm text-white text-center">No saved connections found.</p>
                                 <!-- Saved connections will be listed here -->
                             </div>
                         </div>
@@ -474,23 +494,354 @@
                     </div>
                     <div class="mt-4 bg-gray-800 rounded-md p-4 h-96 overflow-auto">
                         <div id="db-logs-container" class="text-sm text-gray-300 space-y-2">
-                            <p class="text-center text-gray-500">Connect to a database to view logs.</p>
+                            <p class="text-center text-white">Connect to a database to view logs.</p>
                         </div>
                     </div>
-                    <div id="stream-stats" class="mt-2 text-xs text-gray-500 hidden">
+                    <div id="stream-stats" class="mt-2 text-xs text-white hidden">
                         <span>Connected to: <span id="current-db-connection">-</span></span>
                         <span class="ml-4">Logs received: <span id="logs-count">0</span></span>
                         <span class="ml-4">Last update: <span id="last-update-time">-</span></span>
                     </div>
                 </div>
             </div>
-            
-            <div id="live-tab" class="tab-content hidden">
+              <div id="live-tab" class="tab-content hidden">
                 <div class="bg-white shadow sm:rounded-lg p-6">
                     <h2 class="text-lg font-medium text-gray-900">Live Log Stream</h2>
                     <p class="text-sm text-gray-600 mt-1">All logs will be streamed here in real-time.</p>
                     <div class="mt-4 bg-gray-800 rounded-md p-4 h-96 overflow-auto">
                         <div id="live-logs" class="text-sm text-gray-300"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Dashboard Tab -->
+            <div id="dashboard-tab" class="tab-content hidden">
+                <div class="space-y-6">
+                    <!-- System Health Overview -->
+                    <div class="bg-white/80 backdrop-blur-sm shadow-xl border border-white/20 rounded-2xl p-6">
+                        <div class="flex items-center justify-between mb-6">
+                            <div class="flex items-center">
+                                <div class="w-12 h-12 bg-gradient-to-r from-green-500 to-blue-600 rounded-xl flex items-center justify-center">
+                                    <i class="fas fa-tachometer-alt text-white text-xl"></i>
+                                </div>
+                                <div class="ml-4">
+                                    <h2 class="text-2xl font-bold text-gray-900">System Dashboard</h2>
+                                    <p class="text-gray-600">Real-time system metrics and health status</p>
+                                </div>
+                            </div>
+                            <button onclick="refreshDashboard()" class="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors duration-200">
+                                <i class="fas fa-sync-alt mr-2"></i>Refresh
+                            </button>
+                        </div>
+
+                        <!-- Metrics Cards -->
+                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
+                            <div class="bg-gradient-to-br from-blue-50 to-blue-100 border border-blue-200 rounded-xl p-4">
+                                <div class="flex items-center justify-between">
+                                    <div>
+                                        <p class="text-sm font-medium text-blue-800">Total Logs</p>
+                                        <p id="total-logs-count" class="text-2xl font-bold text-blue-900">-</p>
+                                    </div>
+                                    <div class="w-10 h-10 bg-blue-500 rounded-lg flex items-center justify-center">
+                                        <i class="fas fa-file-alt text-white"></i>
+                                    </div>
+                                </div>
+                                <div class="mt-2">
+                                    <span id="logs-per-second" class="text-sm text-blue-600">- logs/sec</span>
+                                </div>
+                            </div>
+
+                            <div class="bg-gradient-to-br from-red-50 to-red-100 border border-red-200 rounded-xl p-4">
+                                <div class="flex items-center justify-between">
+                                    <div>
+                                        <p class="text-sm font-medium text-red-800">Error Rate</p>
+                                        <p id="error-rate" class="text-2xl font-bold text-red-900">-%</p>
+                                    </div>
+                                    <div class="w-10 h-10 bg-red-500 rounded-lg flex items-center justify-center">
+                                        <i class="fas fa-exclamation-circle text-white"></i>
+                                    </div>
+                                </div>
+                                <div class="mt-2">
+                                    <span id="error-count" class="text-sm text-red-600">- errors</span>
+                                </div>
+                            </div>
+
+                            <div class="bg-gradient-to-br from-green-50 to-green-100 border border-green-200 rounded-xl p-4">
+                                <div class="flex items-center justify-between">
+                                    <div>
+                                        <p class="text-sm font-medium text-green-800">System Health</p>
+                                        <p id="system-health" class="text-2xl font-bold text-green-900">-%</p>
+                                    </div>
+                                    <div class="w-10 h-10 bg-green-500 rounded-lg flex items-center justify-center">
+                                        <i class="fas fa-heart text-white"></i>
+                                    </div>
+                                </div>
+                                <div class="mt-2">
+                                    <span id="system-status" class="text-sm text-green-600">Healthy</span>
+                                </div>
+                            </div>
+
+                            <div class="bg-gradient-to-br from-purple-50 to-purple-100 border border-purple-200 rounded-xl p-4">
+                                <div class="flex items-center justify-between">
+                                    <div>
+                                        <p class="text-sm font-medium text-purple-800">Active Services</p>
+                                        <p id="active-services" class="text-2xl font-bold text-purple-900">-</p>
+                                    </div>
+                                    <div class="w-10 h-10 bg-purple-500 rounded-lg flex items-center justify-center">
+                                        <i class="fas fa-server text-white"></i>
+                                    </div>
+                                </div>
+                                <div class="mt-2">
+                                    <span id="unique-users" class="text-sm text-purple-600">- users</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Service Status -->
+                        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                            <div class="bg-white/60 rounded-xl p-4 border border-gray-200">
+                                <h3 class="text-lg font-semibold text-gray-900 mb-4">Top Services</h3>
+                                <div id="top-services" class="space-y-2">
+                                    <!-- Services will be populated here -->
+                                </div>
+                            </div>
+
+                            <div class="bg-white/60 rounded-xl p-4 border border-gray-200">
+                                <h3 class="text-lg font-semibold text-gray-900 mb-4">Recent Trends</h3>
+                                <div id="recent-trends" class="space-y-2">
+                                    <!-- Trends will be populated here -->
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Performance Metrics -->
+                    <div class="bg-white/80 backdrop-blur-sm shadow-xl border border-white/20 rounded-2xl p-6">
+                        <h3 class="text-xl font-bold text-gray-900 mb-4">Performance Metrics</h3>
+                        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                            <div>
+                                <h4 class="text-sm font-medium text-gray-700 mb-2">Throughput</h4>
+                                <div class="space-y-1">
+                                    <p class="text-sm text-gray-600">Logs/Hour: <span id="logs-per-hour" class="font-medium">-</span></p>
+                                    <p class="text-sm text-gray-600">Logs/Minute: <span id="logs-per-minute" class="font-medium">-</span></p>
+                                </div>
+                            </div>
+                            <div>
+                                <h4 class="text-sm font-medium text-gray-700 mb-2">Response Time</h4>
+                                <div class="space-y-1">
+                                    <p class="text-sm text-gray-600">Average: <span id="avg-response-time" class="font-medium">-</span></p>
+                                    <p class="text-sm text-gray-600">95th Percentile: <span id="p95-response-time" class="font-medium">-</span></p>
+                                </div>
+                            </div>
+                            <div>
+                                <h4 class="text-sm font-medium text-gray-700 mb-2">Activity</h4>
+                                <div class="space-y-1">
+                                    <p class="text-sm text-gray-600">Users: <span id="unique-users-detail" class="font-medium">-</span></p>
+                                    <p class="text-sm text-gray-600">Sessions: <span id="unique-sessions" class="font-medium">-</span></p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Alerts Tab -->
+            <div id="alerts-tab" class="tab-content hidden">
+                <div class="space-y-6">
+                    <!-- Alert Controls -->
+                    <div class="bg-white/80 backdrop-blur-sm shadow-xl border border-white/20 rounded-2xl p-6">
+                        <div class="flex items-center justify-between mb-6">
+                            <div class="flex items-center">
+                                <div class="w-12 h-12 bg-gradient-to-r from-orange-500 to-red-600 rounded-xl flex items-center justify-center">
+                                    <i class="fas fa-exclamation-triangle text-white text-xl"></i>
+                                </div>
+                                <div class="ml-4">
+                                    <h2 class="text-2xl font-bold text-gray-900">Alert Management</h2>
+                                    <p class="text-gray-600">Manage alert rules and view active alerts</p>
+                                </div>
+                            </div>
+                            <div class="flex space-x-2">
+                                <button onclick="showCreateAlertModal()" class="px-4 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700 transition-colors duration-200">
+                                    <i class="fas fa-plus mr-2"></i>Create Alert
+                                </button>
+                                <button onclick="refreshAlerts()" class="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors duration-200">
+                                    <i class="fas fa-sync-alt mr-2"></i>Refresh
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Alert Summary -->
+                        <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+                            <div class="bg-gradient-to-br from-red-50 to-red-100 border border-red-200 rounded-lg p-4">
+                                <div class="flex items-center">
+                                    <div class="w-8 h-8 bg-red-500 rounded-lg flex items-center justify-center">
+                                        <i class="fas fa-fire text-white text-sm"></i>
+                                    </div>
+                                    <div class="ml-3">
+                                        <p class="text-sm font-medium text-red-800">Critical</p>
+                                        <p id="critical-alerts-count" class="text-xl font-bold text-red-900">0</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="bg-gradient-to-br from-orange-50 to-orange-100 border border-orange-200 rounded-lg p-4">
+                                <div class="flex items-center">
+                                    <div class="w-8 h-8 bg-orange-500 rounded-lg flex items-center justify-center">
+                                        <i class="fas fa-exclamation text-white text-sm"></i>
+                                    </div>
+                                    <div class="ml-3">
+                                        <p class="text-sm font-medium text-orange-800">High</p>
+                                        <p id="high-alerts-count" class="text-xl font-bold text-orange-900">0</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="bg-gradient-to-br from-yellow-50 to-yellow-100 border border-yellow-200 rounded-lg p-4">
+                                <div class="flex items-center">
+                                    <div class="w-8 h-8 bg-yellow-500 rounded-lg flex items-center justify-center">
+                                        <i class="fas fa-exclamation-triangle text-white text-sm"></i>
+                                    </div>
+                                    <div class="ml-3">
+                                        <p class="text-sm font-medium text-yellow-800">Medium</p>
+                                        <p id="medium-alerts-count" class="text-xl font-bold text-yellow-900">0</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="bg-gradient-to-br from-gray-50 to-gray-100 border border-gray-200 rounded-lg p-4">
+                                <div class="flex items-center">
+                                    <div class="w-8 h-8 bg-gray-500 rounded-lg flex items-center justify-center">
+                                        <i class="fas fa-info text-white text-sm"></i>
+                                    </div>
+                                    <div class="ml-3">
+                                        <p class="text-sm font-medium text-gray-800">Low</p>
+                                        <p id="low-alerts-count" class="text-xl font-bold text-gray-900">0</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Active Alerts -->
+                        <div class="bg-white/60 rounded-xl p-4 border border-gray-200">
+                            <h3 class="text-lg font-semibold text-gray-900 mb-4">Active Alerts</h3>
+                            <div id="active-alerts" class="space-y-3">
+                                <div class="text-center text-white py-8">
+                                    <i class="fas fa-bell-slash text-4xl text-gray-300 mb-2"></i>
+                                    <p>No active alerts</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Alert Rules -->
+                    <div class="bg-white/80 backdrop-blur-sm shadow-xl border border-white/20 rounded-2xl p-6">
+                        <h3 class="text-xl font-bold text-gray-900 mb-4">Alert Rules</h3>
+                        <div id="alert-rules" class="space-y-3">
+                            <!-- Alert rules will be populated here -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Anomalies Tab -->
+            <div id="anomalies-tab" class="tab-content hidden">
+                <div class="space-y-6">
+                    <!-- Anomaly Detection Controls -->
+                    <div class="bg-white/80 backdrop-blur-sm shadow-xl border border-white/20 rounded-2xl p-6">
+                        <div class="flex items-center justify-between mb-6">
+                            <div class="flex items-center">
+                                <div class="w-12 h-12 bg-gradient-to-r from-purple-500 to-blue-600 rounded-xl flex items-center justify-center">
+                                    <i class="fas fa-chart-line text-white text-xl"></i>
+                                </div>
+                                <div class="ml-4">
+                                    <h2 class="text-2xl font-bold text-gray-900">Anomaly Detection</h2>
+                                    <p class="text-gray-600">Monitor and detect unusual patterns in your logs</p>
+                                </div>
+                            </div>
+                            <div class="flex space-x-2">
+                                <button onclick="startAnomalyMonitoring()" id="monitoring-toggle" class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors duration-200">
+                                    <i class="fas fa-play mr-2"></i>Start Monitoring
+                                </button>
+                                <button onclick="refreshAnomalies()" class="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors duration-200">
+                                    <i class="fas fa-sync-alt mr-2"></i>Refresh
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Anomaly Configuration -->
+                        <div class="bg-white/60 rounded-xl p-4 border border-gray-200 mb-6">
+                            <h3 class="text-lg font-semibold text-gray-900 mb-4">Detection Configuration</h3>
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Sensitivity</label>
+                                    <input type="range" id="sensitivity-slider" min="0.1" max="1.0" step="0.1" value="0.8" class="w-full">
+                                    <span id="sensitivity-value" class="text-xs text-white">0.8</span>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Time Window (minutes)</label>
+                                    <input type="number" id="time-window" value="60" min="5" max="1440" class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Detection Methods</label>
+                                    <div class="space-y-1">
+                                        <label class="flex items-center">
+                                            <input type="checkbox" id="volume-detection" checked class="mr-2">
+                                            <span class="text-sm">Volume</span>
+                                        </label>
+                                        <label class="flex items-center">
+                                            <input type="checkbox" id="pattern-detection" checked class="mr-2">
+                                            <span class="text-sm">Pattern</span>
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                            <button onclick="updateAnomalyConfig()" class="mt-4 px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors duration-200">
+                                Update Configuration
+                            </button>
+                        </div>
+
+                        <!-- System Health Score -->
+                        <div class="bg-gradient-to-r from-blue-50 to-purple-50 border border-blue-200 rounded-xl p-4 mb-6">
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <h4 class="text-lg font-semibold text-gray-900">System Health Score</h4>
+                                    <p class="text-sm text-gray-600">Overall system anomaly health</p>
+                                </div>
+                                <div class="text-right">
+                                    <div id="health-score" class="text-3xl font-bold text-blue-900">100</div>
+                                    <div class="w-24 bg-gray-200 rounded-full h-2 mt-2">
+                                        <div id="health-score-bar" class="bg-green-500 h-2 rounded-full" style="width: 100%"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Detected Anomalies -->
+                        <div class="bg-white/60 rounded-xl p-4 border border-gray-200">
+                            <h3 class="text-lg font-semibold text-gray-900 mb-4">Detected Anomalies</h3>
+                            <div id="detected-anomalies" class="space-y-3">
+                                <div class="text-center text-white py-8">
+                                    <i class="fas fa-chart-area text-4xl text-gray-300 mb-2"></i>
+                                    <p>No anomalies detected</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Anomaly Report -->
+                    <div class="bg-white/80 backdrop-blur-sm shadow-xl border border-white/20 rounded-2xl p-6">
+                        <h3 class="text-xl font-bold text-gray-900 mb-4">Anomaly Report</h3>
+                        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                            <div>
+                                <h4 class="text-sm font-medium text-gray-700 mb-2">By Type</h4>
+                                <div id="anomalies-by-type" class="space-y-2">
+                                    <!-- Will be populated with anomaly type breakdown -->
+                                </div>
+                            </div>
+                            <div>
+                                <h4 class="text-sm font-medium text-gray-700 mb-2">By Severity</h4>
+                                <div id="anomalies-by-severity" class="space-y-2">
+                                    <!-- Will be populated with severity breakdown -->
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -507,7 +858,7 @@
                 <div class="ml-3 flex-1">
                     <div class="notification-content">
                         <p class="text-sm font-medium text-gray-900" id="notification-title">Success!</p>
-                        <p class="text-sm text-gray-500 mt-1" id="notification-message">Operation completed successfully</p>
+                        <p class="text-sm text-white mt-1" id="notification-message">Operation completed successfully</p>
                     </div>
                 </div>
                 <div class="ml-4 flex-shrink-0 flex">
@@ -515,6 +866,59 @@
                         <i class="fas fa-times text-sm"></i>
                     </button>
                 </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Create Alert Rule Modal -->
+    <div id="create-alert-modal" class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden overflow-y-auto h-full w-full z-50">
+        <div class="relative top-20 mx-auto p-5 border w-11/12 md:w-1/2 lg:w-1/3 shadow-lg rounded-md bg-white">
+            <div class="mt-3">
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="text-lg font-medium text-gray-900">Create Alert Rule</h3>
+                    <button onclick="hideCreateAlertModal()" class="text-gray-400 hover:text-gray-600">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                <form id="create-alert-form" class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Rule Name</label>
+                        <input type="text" id="alert-name" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500" placeholder="Enter rule name" required>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Pattern</label>
+                        <input type="text" id="alert-pattern" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500" placeholder="Enter pattern to match" required>
+                        <p class="text-xs text-white mt-1">Keywords or patterns to search for in log messages</p>
+                    </div>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Severity</label>
+                            <select id="alert-severity" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                                <option value="low">Low</option>
+                                <option value="medium" selected>Medium</option>
+                                <option value="high">High</option>
+                                <option value="critical">Critical</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Threshold</label>
+                            <input type="number" id="alert-threshold" min="1" value="1" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500" placeholder="1">
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Time Window (seconds)</label>
+                        <input type="number" id="alert-time-window" min="60" value="300" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500" placeholder="300">
+                        <p class="text-xs text-white mt-1">Time window for counting pattern matches</p>
+                    </div>
+                    <div class="flex justify-end space-x-3 pt-4">
+                        <button type="button" onclick="hideCreateAlertModal()" class="px-4 py-2 bg-gray-300 text-gray-700 rounded-md hover:bg-gray-400 transition-colors duration-200">
+                            Cancel
+                        </button>
+                        <button type="submit" class="px-4 py-2 bg-orange-600 text-white rounded-md hover:bg-orange-700 transition-colors duration-200">
+                            Create Rule
+                        </button>
+                    </div>
+                </form>
             </div>
         </div>
     </div>

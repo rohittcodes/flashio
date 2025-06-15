@@ -50,6 +50,19 @@ async def verify_api_key(x_api_key: str = Header(...)):
         raise HTTPException(status_code=401, detail="Invalid API key")
     return x_api_key
 
+async def verify_api_key_optional(x_api_key: str = Header(None)):
+    """Optional API key verification for read-only endpoints"""
+    if x_api_key is None:
+        return None  # Allow access without API key
+    
+    expected_key_hash = os.getenv('API_KEY_HASH')
+    if not expected_key_hash:
+        return None  # If no API key is configured, allow access
+    
+    if credential_manager.hash_api_key(x_api_key) != expected_key_hash:
+        raise HTTPException(status_code=401, detail="Invalid API key")
+    return x_api_key
+
 # In-memory storage for demonstration (use database in production)
 alert_rules: Dict[str, AlertRule] = {}
 active_alerts: Dict[str, Alert] = {}
@@ -72,7 +85,7 @@ async def create_alert_rule(
         raise HTTPException(status_code=500, detail=f"Failed to create alert rule: {str(e)}")
 
 @router.get("/rules", response_model=List[Dict[str, Any]])
-async def get_alert_rules(api_key: str = Depends(verify_api_key)):
+async def get_alert_rules(api_key: str = Depends(verify_api_key_optional)):
     """Get all alert rules"""
     try:
         return [
@@ -145,7 +158,7 @@ async def check_alerts_manually(
 @router.get("/active", response_model=List[Alert])
 async def get_active_alerts(
     severity: Optional[str] = None,
-    api_key: str = Depends(verify_api_key)
+    api_key: str = Depends(verify_api_key_optional)
 ):
     """Get active alerts, optionally filtered by severity"""
     try:
@@ -179,7 +192,7 @@ async def acknowledge_alert(
         raise HTTPException(status_code=500, detail=f"Failed to acknowledge alert: {str(e)}")
 
 @router.get("/summary", response_model=AlertSummary)
-async def get_alert_summary(api_key: str = Depends(verify_api_key)):
+async def get_alert_summary(api_key: str = Depends(verify_api_key_optional)):
     """Get alert summary and statistics"""
     try:
         alerts = list(active_alerts.values())

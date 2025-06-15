@@ -1,50 +1,99 @@
 function showTab(tabName) {
+    console.log(`Switching to tab: ${tabName}`);
+    
+    // Hide all tab content
     document.querySelectorAll('.tab-content').forEach(tab => {
         tab.classList.add('hidden');
     });
     
-    document.getElementById(`${tabName}-tab`).classList.remove('hidden');
+    // Show the selected tab
+    const selectedTab = document.getElementById(`${tabName}-tab`);
+    if (selectedTab) {
+        selectedTab.classList.remove('hidden');
+        console.log(`Tab ${tabName} is now visible`);
+    } else {
+        console.error(`Tab ${tabName}-tab not found!`);
+    }
     
+    // Update navigation styling
     document.querySelectorAll('nav a').forEach(link => {
-        if (link.getAttribute('onclick').includes(tabName)) {
+        if (link.getAttribute('onclick') && link.getAttribute('onclick').includes(tabName)) {
             link.classList.add('text-gray-900', 'border-indigo-500');
-            link.classList.remove('text-gray-500', 'border-transparent', 'hover:border-gray-300');
+            link.classList.remove('text-white', 'border-transparent', 'hover:border-gray-300');
         } else {
             link.classList.remove('text-gray-900', 'border-indigo-500');
-            link.classList.add('text-gray-500', 'border-transparent', 'hover:border-gray-300');
+            link.classList.add('text-white', 'border-transparent', 'hover:border-gray-300');
         }
     });
 
-    // Handle WebSocket connection for live tab - keep connection alive once established
+    // Handle WebSocket connection for live tab
     if (tabName === 'live') {
         if (!logWebSocket) {
             logWebSocket = new LogWebSocket();
             logWebSocket.connect();
         }
     }
-    // Don't disconnect when switching tabs - this keeps the connection alive during app navigation
-}
-
-// Enhanced tab switching function to load agent state
-const originalShowTab = showTab;
-showTab = function(tabName) {
-    originalShowTab(tabName);
     
-    // When switching to the agent tab, refresh the state
-    if (tabName === 'agent') {
-        refreshAgentState();
+    // Load data for specific tabs
+    switch(tabName) {
+        case 'agent':
+            if (typeof refreshAgentState === 'function') {
+                refreshAgentState();
+            }
+            break;
+        case 'dashboard':
+            if (typeof refreshDashboard === 'function') {
+                refreshDashboard();
+            }
+            break;
+        case 'alerts':
+            if (typeof refreshAlerts === 'function') {
+                refreshAlerts();
+            }
+            break;
+        case 'anomalies':
+            if (typeof refreshAnomalies === 'function') {
+                refreshAnomalies();
+            }
+            break;
     }
-};
+}
 
 function showNotification(message, type = 'success') {
     const notification = document.getElementById('notification');
-    notification.textContent = message;
-    notification.classList.remove('hidden', 'bg-green-500', 'bg-red-500');
-    notification.classList.add(type === 'success' ? 'bg-green-500' : 'bg-red-500');
+    const titleElement = document.getElementById('notification-title');
+    const messageElement = document.getElementById('notification-message');
+    const iconElement = notification.querySelector('.notification-icon i');
     
+    // Update content
+    titleElement.textContent = type === 'success' ? 'Success!' : type === 'error' ? 'Error!' : 'Info';
+    messageElement.textContent = message;
+    
+    // Update styling based on type
+    const borderColor = type === 'success' ? 'border-green-500' : type === 'error' ? 'border-red-500' : 'border-blue-500';
+    const bgColor = type === 'success' ? 'bg-green-100' : type === 'error' ? 'bg-red-100' : 'bg-blue-100';
+    const textColor = type === 'success' ? 'text-green-600' : type === 'error' ? 'text-red-600' : 'text-blue-600';
+    const icon = type === 'success' ? 'fa-check' : type === 'error' ? 'fa-times' : 'fa-info';
+    
+    // Reset classes
+    notification.querySelector('.bg-white').className = `bg-white border-l-4 ${borderColor} rounded-lg shadow-2xl p-4 max-w-sm`;
+    notification.querySelector('.notification-icon').className = `notification-icon w-8 h-8 rounded-full ${bgColor} flex items-center justify-center`;
+    iconElement.className = `fas ${icon} ${textColor} text-sm`;
+    
+    // Show notification
+    notification.classList.remove('translate-x-full');
+    notification.classList.add('translate-x-0');
+    
+    // Auto-hide after 3 seconds
     setTimeout(() => {
-        notification.classList.add('hidden');
+        hideNotification();
     }, 3000);
+}
+
+function hideNotification() {
+    const notification = document.getElementById('notification');
+    notification.classList.remove('translate-x-0');
+    notification.classList.add('translate-x-full');
 }
 
 function updateFileName(input) {
@@ -184,7 +233,7 @@ document.getElementById('query-form').addEventListener('submit', async function(
                             <div class="flex justify-between items-start">
                                 <span class="${levelClass} font-medium">${level}</span>
                                 <div class="flex flex-col items-end">
-                                    <span class="text-gray-500 text-sm">${new Date(log.timestamp).toLocaleString()}</span>
+                                    <span class="text-white text-sm">${new Date(log.timestamp).toLocaleString()}</span>
                                     <span class="text-gray-400 text-xs">${log.service || 'unknown'}</span>
                                 </div>
                             </div>
@@ -328,8 +377,8 @@ class LogWebSocket {
                 'ERROR': 'text-red-500',
                 'WARN': 'text-yellow-500',
                 'INFO': 'text-blue-500',
-                'DEBUG': 'text-gray-500'
-            }[level] || 'text-gray-500';
+                'DEBUG': 'text-white'
+            }[level] || 'text-white';
             
             const logEntry = document.createElement('div');
             logEntry.className = 'mb-4 p-2 border-l-4 border-gray-700';
@@ -360,7 +409,7 @@ class LogWebSocket {
             rightSide.className = 'text-right';
             rightSide.innerHTML = `
                 <div class="text-gray-400 text-xs">${new Date(log.timestamp).toLocaleString()}</div>
-                <div class="text-gray-500 text-xs">${log.producer_id || 'unknown'}</div>
+                <div class="text-white text-xs">${log.producer_id || 'unknown'}</div>
             `;
             
             header.appendChild(leftSide);
@@ -847,7 +896,7 @@ function updateFindingsTimeline(state) {
     
     // No findings available
     if (!state.findings || state.findings.length === 0) {
-        timelineEl.innerHTML = '<div class="text-sm text-gray-500 text-center py-6">No findings available yet.</div>';
+        timelineEl.innerHTML = '<div class="text-sm text-white text-center py-6">No findings available yet.</div>';
         return;
     }
     
@@ -874,7 +923,7 @@ function updateFindingsTimeline(state) {
                 <div class="bg-white rounded-lg shadow-sm p-4">
                     <div class="flex justify-between items-start mb-2">
                         <h4 class="text-sm font-medium text-gray-900">${title}</h4>
-                        <span class="text-xs text-gray-500">${formatTimeAgo(timestamp)}</span>
+                        <span class="text-xs text-white">${formatTimeAgo(timestamp)}</span>
                     </div>
                     <div class="text-sm text-gray-600 markdown-content">
                         ${renderMarkdown(truncateAnalysis(finding.analysis, 150))}
@@ -965,7 +1014,7 @@ class DatabaseLogStreamer {
             
             // Show connecting state
             const logsContainer = document.getElementById('db-logs-container');
-            logsContainer.innerHTML = '<div class="text-center py-6"><div class="inline-block animate-spin h-8 w-8 border-4 border-indigo-500 border-t-transparent rounded-full"></div><p class="mt-2 text-gray-500">Connecting to database...</p></div>';
+            logsContainer.innerHTML = '<div class="text-center py-6"><div class="inline-block animate-spin h-8 w-8 border-4 border-indigo-500 border-t-transparent rounded-full"></div><p class="mt-2 text-white">Connecting to database...</p></div>';
             
             // Test connection first
             const testResponse = await fetch('/ingest/database/test-connection', {
@@ -1012,7 +1061,7 @@ class DatabaseLogStreamer {
         try {
             // Show loading state for table list
             const tablesList = document.getElementById('tables-list');
-            tablesList.innerHTML = '<div class="text-center py-4"><div class="inline-block animate-spin h-5 w-5 border-2 border-indigo-500 border-t-transparent rounded-full"></div><p class="mt-2 text-sm text-gray-500">Retrieving tables...</p></div>';
+            tablesList.innerHTML = '<div class="text-center py-4"><div class="inline-block animate-spin h-5 w-5 border-2 border-indigo-500 border-t-transparent rounded-full"></div><p class="mt-2 text-sm text-white">Retrieving tables...</p></div>';
             
             // Ensure the table browser section is visible
             document.getElementById('table-browser-section').classList.remove('hidden');
@@ -1035,7 +1084,7 @@ class DatabaseLogStreamer {
             this.availableTables = result.tables || [];
             
             if (this.availableTables.length === 0) {
-                tablesList.innerHTML = '<p class="text-sm text-gray-500 text-center py-4">No tables found in database.</p>';
+                tablesList.innerHTML = '<p class="text-sm text-white text-center py-4">No tables found in database.</p>';
                 return;
             }
             
@@ -1230,8 +1279,8 @@ class DatabaseLogStreamer {
                 'ERROR': 'text-red-500',
                 'WARN': 'text-yellow-500',
                 'INFO': 'text-blue-500',
-                'DEBUG': 'text-gray-500'
-            }[level] || 'text-gray-500';
+                'DEBUG': 'text-white'
+            }[level] || 'text-white';
             
             const logEntry = document.createElement('div');
             logEntry.className = 'mb-4 p-2 border-l-4 border-gray-700';
@@ -1416,7 +1465,7 @@ class DatabaseLogStreamer {
         
         // Reset logs display
         const logsContainer = document.getElementById('db-logs-container');
-        logsContainer.innerHTML = '<p class="text-center text-gray-500">Connect to a database to view logs.</p>';
+        logsContainer.innerHTML = '<p class="text-center text-white">Connect to a database to view logs.</p>';
         
         // Hide stats
         document.getElementById('stream-stats').classList.add('hidden');
@@ -1476,7 +1525,7 @@ class DatabaseLogStreamer {
         const container = document.getElementById('connections-list');
         
         if (!this.savedConnections || this.savedConnections.length === 0) {
-            container.innerHTML = '<p class="text-sm text-gray-500 text-center">No saved connections found.</p>';
+            container.innerHTML = '<p class="text-sm text-white text-center">No saved connections found.</p>';
             return;
         }
         
@@ -1488,7 +1537,7 @@ class DatabaseLogStreamer {
                 <div class="flex items-center justify-between p-2 bg-white rounded shadow-sm">
                     <div class="overflow-hidden">
                         <p class="text-sm font-medium text-gray-800 truncate">${conn.displayName}</p>
-                        <p class="text-xs text-gray-500">${conn.db_type} • Last used: ${conn.lastUsed || 'Never'}</p>
+                        <p class="text-xs text-white">${conn.db_type} • Last used: ${conn.lastUsed || 'Never'}</p>
                     </div>
                     <div class="flex space-x-2">
                         <button data-connection-id="${conn.id}" class="connect-saved text-xs px-2 py-1 bg-indigo-500 text-white rounded hover:bg-indigo-600">
@@ -1774,4 +1823,710 @@ document.addEventListener('DOMContentLoaded', () => {
     
     // Initialize saved connections list
     dbStreamer.updateSavedConnectionsList();
+});
+
+// Dashboard Management
+let dashboardData = {};
+let dashboardUpdateInterval = null;
+
+async function refreshDashboard() {
+    try {
+        console.log('Refreshing dashboard...');
+        showNotification('Loading dashboard data...', 'info');
+        
+        // Get logs from the current session or database
+        const logs = await getCurrentLogs();
+        
+        if (!logs || logs.length === 0) {
+            console.log('No logs available for dashboard');
+            showNotification('No logs available for dashboard', 'warning');
+            // Show empty dashboard state
+            updateEmptyDashboard();
+            return;
+        }
+
+        console.log(`Found ${logs.length} logs for dashboard`);
+        
+        const response = await fetch('/metrics/dashboard', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(logs)
+        });
+
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        dashboardData = await response.json();
+        console.log('Dashboard data received:', dashboardData);
+        updateDashboardUI();
+        showNotification('Dashboard updated successfully');
+    } catch (error) {
+        console.error('Error refreshing dashboard:', error);
+        showNotification(`Failed to refresh dashboard: ${error.message}`, 'error');
+        // Show error state but still populate with sample data
+        updateEmptyDashboard();
+    }
+}
+
+function updateEmptyDashboard() {
+    // Update with placeholder data
+    document.getElementById('total-logs-count').textContent = '0';
+    document.getElementById('logs-per-second').textContent = '0.0 logs/sec';
+    document.getElementById('error-rate').textContent = '0.0%';
+    document.getElementById('error-count').textContent = '0 errors';
+    document.getElementById('system-health').textContent = '100%';
+    document.getElementById('system-status').textContent = 'Healthy';
+    document.getElementById('active-services').textContent = '0';
+    document.getElementById('unique-users').textContent = '0 users';
+    
+    document.getElementById('logs-per-hour').textContent = '0';
+    document.getElementById('logs-per-minute').textContent = '0.0';
+    document.getElementById('avg-response-time').textContent = 'N/A';
+    document.getElementById('p95-response-time').textContent = 'N/A';
+    document.getElementById('unique-users-detail').textContent = '0';
+    document.getElementById('unique-sessions').textContent = '0';
+    
+    // Clear services and trends
+    document.getElementById('top-services').innerHTML = '<p class="text-white text-center py-4">No services data available</p>';
+    document.getElementById('recent-trends').innerHTML = '<p class="text-white text-center py-4">No trends data available</p>';
+}
+
+function updateDashboardUI() {
+    const data = dashboardData;
+    
+    if (!data.current_metrics) return;
+    
+    // Update metric cards
+    document.getElementById('total-logs-count').textContent = data.current_metrics.total_logs || 0;
+    document.getElementById('logs-per-second').textContent = `${(data.current_metrics.logs_per_second || 0).toFixed(2)} logs/sec`;
+    document.getElementById('error-rate').textContent = `${((data.current_metrics.error_rate || 0) * 100).toFixed(1)}%`;
+    document.getElementById('error-count').textContent = `${Math.round((data.current_metrics.error_rate || 0) * data.current_metrics.total_logs)} errors`;
+    document.getElementById('system-health').textContent = `${(data.performance_metrics?.system_health_score || 100).toFixed(0)}%`;
+    document.getElementById('system-status').textContent = data.real_time_stats?.system_status || 'Unknown';
+    document.getElementById('active-services').textContent = data.real_time_stats?.active_services || 0;
+    document.getElementById('unique-users').textContent = `${data.current_metrics.unique_users || 0} users`;
+
+    // Update performance metrics
+    if (data.performance_metrics?.throughput) {
+        document.getElementById('logs-per-hour').textContent = (data.performance_metrics.throughput.logs_per_hour || 0).toFixed(0);
+        document.getElementById('logs-per-minute').textContent = (data.performance_metrics.throughput.logs_per_minute || 0).toFixed(1);
+    }
+    
+    if (data.current_metrics.response_time_avg) {
+        document.getElementById('avg-response-time').textContent = `${data.current_metrics.response_time_avg.toFixed(0)}ms`;
+    }
+    
+    if (data.current_metrics.response_time_p95) {
+        document.getElementById('p95-response-time').textContent = `${data.current_metrics.response_time_p95.toFixed(0)}ms`;
+    }
+    
+    document.getElementById('unique-users-detail').textContent = data.current_metrics.unique_users || 0;
+    document.getElementById('unique-sessions').textContent = data.current_metrics.unique_sessions || 0;
+
+    // Update top services
+    updateTopServices(data.current_metrics.top_services || []);
+    
+    // Update recent trends
+    updateRecentTrends(data.recent_trends || []);
+}
+
+function updateTopServices(services) {
+    const container = document.getElementById('top-services');
+    container.innerHTML = '';
+    
+    services.slice(0, 5).forEach(service => {
+        const serviceDiv = document.createElement('div');
+        serviceDiv.className = 'flex items-center justify-between py-2 px-3 bg-gray-50 rounded-lg';
+        serviceDiv.innerHTML = `
+            <span class="text-sm font-medium text-gray-900">${service.service}</span>
+            <div class="text-right">
+                <span class="text-sm text-gray-600">${service.count} logs</span>
+                <div class="text-xs text-white">${service.percentage.toFixed(1)}%</div>
+            </div>
+        `;
+        container.appendChild(serviceDiv);
+    });
+}
+
+function updateRecentTrends(trends) {
+    const container = document.getElementById('recent-trends');
+    container.innerHTML = '';
+    
+    trends.slice(-6).forEach(trend => {
+        const trendDiv = document.createElement('div');
+        trendDiv.className = 'flex items-center justify-between py-2 px-3 bg-gray-50 rounded-lg';
+        trendDiv.innerHTML = `
+            <span class="text-sm font-medium text-gray-900">${trend.hour}</span>
+            <div class="text-right">
+                <span class="text-sm text-gray-600">${trend.logs} logs</span>
+                <div class="text-xs ${trend.error_rate > 0.1 ? 'text-red-500' : 'text-green-500'}">${(trend.error_rate * 100).toFixed(1)}% errors</div>
+            </div>
+        `;
+        container.appendChild(trendDiv);
+    });
+}
+
+// Alert Management
+let alertRules = [];
+let activeAlerts = [];
+
+async function refreshAlerts() {
+    try {
+        showNotification('Loading alerts...', 'info');
+        
+        // Get alert rules
+        const rulesResponse = await fetch('/alerts/rules');
+        if (rulesResponse.ok) {
+            alertRules = await rulesResponse.json();
+        }
+        
+        // Get active alerts
+        const alertsResponse = await fetch('/alerts/active');
+        if (alertsResponse.ok) {
+            activeAlerts = await alertsResponse.json();
+        }
+        
+        // Get alert summary
+        const summaryResponse = await fetch('/alerts/summary');
+        if (summaryResponse.ok) {
+            const summary = await summaryResponse.json();
+            updateAlertSummary(summary);
+        }
+        
+        updateAlertRulesUI();
+        updateActiveAlertsUI();
+        showNotification('Alerts updated successfully');
+    } catch (error) {
+        console.error('Error refreshing alerts:', error);
+        showNotification(`Failed to refresh alerts: ${error.message}`, 'error');
+    }
+}
+
+function updateAlertSummary(summary) {
+    document.getElementById('critical-alerts-count').textContent = summary.critical_alerts || 0;
+    document.getElementById('high-alerts-count').textContent = summary.high_alerts || 0;
+    document.getElementById('medium-alerts-count').textContent = summary.medium_alerts || 0;
+    document.getElementById('low-alerts-count').textContent = summary.low_alerts || 0;
+    
+    // Update navbar alert count
+    const alertCount = document.getElementById('alert-count');
+    const totalAlerts = summary.total_alerts || 0;
+    if (totalAlerts > 0) {
+        alertCount.textContent = totalAlerts;
+        alertCount.classList.remove('hidden');
+    } else {
+        alertCount.classList.add('hidden');
+    }
+}
+
+function updateActiveAlertsUI() {
+    const container = document.getElementById('active-alerts');
+    container.innerHTML = '';
+    
+    if (activeAlerts.length === 0) {
+        container.innerHTML = `
+            <div class="text-center text-white py-8">
+                <i class="fas fa-bell-slash text-4xl text-gray-300 mb-2"></i>
+                <p>No active alerts</p>
+            </div>
+        `;
+        return;
+    }
+    
+    activeAlerts.forEach(alert => {
+        const alertDiv = document.createElement('div');
+        const severityColor = getSeverityColor(alert.severity);
+        alertDiv.className = `border-l-4 ${severityColor.border} bg-${severityColor.bg} p-4 rounded-lg`;
+        alertDiv.innerHTML = `
+            <div class="flex items-start justify-between">
+                <div class="flex-1">
+                    <h4 class="text-sm font-medium ${severityColor.text}">${alert.rule_name}</h4>
+                    <p class="text-sm text-gray-600 mt-1">${alert.message}</p>
+                    <div class="flex items-center mt-2 text-xs text-white">
+                        <span>Severity: ${alert.severity}</span>
+                        <span class="mx-2">•</span>
+                        <span>Logs: ${alert.log_count}</span>
+                        <span class="mx-2">•</span>
+                        <span>${new Date(alert.timestamp).toLocaleString()}</span>
+                    </div>
+                </div>
+                <div class="flex space-x-2 ml-4">
+                    <button onclick="acknowledgeAlert('${alert.id}')" class="px-3 py-1 bg-blue-600 text-white text-xs rounded hover:bg-blue-700">
+                        Acknowledge
+                    </button>
+                </div>
+            </div>
+        `;
+        container.appendChild(alertDiv);
+    });
+}
+
+function updateAlertRulesUI() {
+    const container = document.getElementById('alert-rules');
+    container.innerHTML = '';
+    
+    if (alertRules.length === 0) {
+        container.innerHTML = `
+            <div class="text-center text-white py-8">
+                <i class="fas fa-plus-circle text-4xl text-gray-300 mb-2"></i>
+                <p>No alert rules configured</p>
+                <button onclick="showCreateAlertModal()" class="mt-2 px-4 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700">
+                    Create First Rule
+                </button>
+            </div>
+        `;
+        return;
+    }
+    
+    alertRules.forEach(rule => {
+        const ruleDiv = document.createElement('div');
+        ruleDiv.className = 'border border-gray-200 rounded-lg p-4 bg-white';
+        ruleDiv.innerHTML = `
+            <div class="flex items-start justify-between">
+                <div class="flex-1">
+                    <h4 class="text-sm font-medium text-gray-900">${rule.name}</h4>
+                    <p class="text-sm text-gray-600 mt-1">Pattern: "${rule.pattern}"</p>
+                    <div class="flex items-center mt-2 text-xs text-white">
+                        <span class="px-2 py-1 bg-${getSeverityColor(rule.severity).bg} text-${getSeverityColor(rule.severity).text} rounded">${rule.severity}</span>
+                        <span class="mx-2">•</span>
+                        <span>Threshold: ${rule.threshold}</span>
+                        <span class="mx-2">•</span>
+                        <span>${rule.enabled ? 'Enabled' : 'Disabled'}</span>
+                    </div>
+                </div>
+                <div class="flex space-x-2 ml-4">
+                    <button onclick="toggleAlertRule('${rule.id}')" class="px-3 py-1 ${rule.enabled ? 'bg-red-600 hover:bg-red-700' : 'bg-green-600 hover:bg-green-700'} text-white text-xs rounded">
+                        ${rule.enabled ? 'Disable' : 'Enable'}
+                    </button>
+                    <button onclick="deleteAlertRule('${rule.id}')" class="px-3 py-1 bg-gray-600 text-white text-xs rounded hover:bg-gray-700">
+                        Delete
+                    </button>
+                </div>
+            </div>
+        `;
+        container.appendChild(ruleDiv);
+    });
+}
+
+function getSeverityColor(severity) {
+    const colors = {
+        critical: { bg: 'red-100', text: 'red-800', border: 'border-red-500' },
+        high: { bg: 'orange-100', text: 'orange-800', border: 'border-orange-500' },
+        medium: { bg: 'yellow-100', text: 'yellow-800', border: 'border-yellow-500' },
+        low: { bg: 'gray-100', text: 'gray-800', border: 'border-gray-500' }
+    };
+    return colors[severity] || colors.low;
+}
+
+async function acknowledgeAlert(alertId) {
+    try {
+        const response = await fetch(`/alerts/acknowledge/${alertId}`, {
+            method: 'POST'
+        });
+        
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        
+        showNotification('Alert acknowledged');
+        refreshAlerts();
+    } catch (error) {
+        showNotification(`Failed to acknowledge alert: ${error.message}`, 'error');
+    }
+}
+
+// Modal Management
+function showCreateAlertModal() {
+    document.getElementById('create-alert-modal').classList.remove('hidden');
+}
+
+function hideCreateAlertModal() {
+    document.getElementById('create-alert-modal').classList.add('hidden');
+    document.getElementById('create-alert-form').reset();
+}
+
+// Enhanced create alert function using the modal
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.getElementById('create-alert-form');
+    if (form) {
+        form.addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const ruleData = {
+                name: document.getElementById('alert-name').value,
+                pattern: document.getElementById('alert-pattern').value,
+                severity: document.getElementById('alert-severity').value,
+                threshold: parseInt(document.getElementById('alert-threshold').value),
+                time_window: parseInt(document.getElementById('alert-time-window').value),
+                enabled: true,
+                notification_channels: []
+            };
+            
+            createAlertRule(ruleData);
+            hideCreateAlertModal();
+        });
+    }
+});
+
+async function createAlertRule(ruleData) {
+    try {
+        const response = await fetch('/alerts/rules', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(ruleData)
+        });
+        
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        
+        showNotification('Alert rule created successfully');
+        refreshAlerts();
+    } catch (error) {
+        showNotification(`Failed to create alert rule: ${error.message}`, 'error');
+    }
+}
+
+async function deleteAlertRule(ruleId) {
+    if (!confirm('Are you sure you want to delete this alert rule?')) return;
+    
+    try {
+        const response = await fetch(`/alerts/rules/${ruleId}`, {
+            method: 'DELETE'
+        });
+        
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        
+        showNotification('Alert rule deleted successfully');
+        refreshAlerts();
+    } catch (error) {
+        showNotification(`Failed to delete alert rule: ${error.message}`, 'error');
+    }
+}
+
+// Anomaly Detection Management
+let anomalyConfig = {};
+let detectedAnomalies = [];
+let monitoringActive = false;
+
+async function refreshAnomalies() {
+    try {
+        showNotification('Loading anomaly data...', 'info');
+        
+        // Get configuration
+        const configResponse = await fetch('/anomalies/config');
+        if (configResponse.ok) {
+            anomalyConfig = await configResponse.json();
+            updateAnomalyConfigUI();
+        }
+        
+        // Get detected anomalies
+        const anomaliesResponse = await fetch('/anomalies/detected');
+        if (anomaliesResponse.ok) {
+            detectedAnomalies = await anomaliesResponse.json();
+        }
+        
+        // Get anomaly report
+        const reportResponse = await fetch('/anomalies/report');
+        if (reportResponse.ok) {
+            const report = await reportResponse.json();
+            updateAnomalyReport(report);
+        }
+        
+        // Get monitoring status
+        const statusResponse = await fetch('/anomalies/monitoring-status');
+        if (statusResponse.ok) {
+            const status = await statusResponse.json();
+            monitoringActive = status.monitoring_active;
+            updateMonitoringButton();
+        }
+        
+        updateDetectedAnomaliesUI();
+        showNotification('Anomaly data updated successfully');
+    } catch (error) {
+        console.error('Error refreshing anomalies:', error);
+        showNotification(`Failed to refresh anomalies: ${error.message}`, 'error');
+    }
+}
+
+function updateAnomalyConfigUI() {
+    document.getElementById('sensitivity-slider').value = anomalyConfig.sensitivity || 0.8;
+    document.getElementById('sensitivity-value').textContent = anomalyConfig.sensitivity || 0.8;
+    document.getElementById('time-window').value = (anomalyConfig.time_window || 3600) / 60; // Convert to minutes
+    document.getElementById('volume-detection').checked = (anomalyConfig.detection_methods || []).includes('volume');
+    document.getElementById('pattern-detection').checked = (anomalyConfig.detection_methods || []).includes('pattern');
+}
+
+function updateMonitoringButton() {
+    const button = document.getElementById('monitoring-toggle');
+    if (monitoringActive) {
+        button.innerHTML = '<i class="fas fa-stop mr-2"></i>Stop Monitoring';
+        button.className = 'px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors duration-200';
+        button.onclick = stopAnomalyMonitoring;
+    } else {
+        button.innerHTML = '<i class="fas fa-play mr-2"></i>Start Monitoring';
+        button.className = 'px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors duration-200';
+        button.onclick = startAnomalyMonitoring;
+    }
+}
+
+function updateAnomalyReport(report) {
+    // Update health score
+    const healthScore = report.system_health_score || 100;
+    document.getElementById('health-score').textContent = healthScore.toFixed(0);
+    
+    const healthBar = document.getElementById('health-score-bar');
+    healthBar.style.width = `${healthScore}%`;
+    
+    if (healthScore >= 80) {
+        healthBar.className = 'bg-green-500 h-2 rounded-full';
+    } else if (healthScore >= 60) {
+        healthBar.className = 'bg-yellow-500 h-2 rounded-full';
+    } else {
+        healthBar.className = 'bg-red-500 h-2 rounded-full';
+    }
+    
+    // Update type breakdown
+    const typeContainer = document.getElementById('anomalies-by-type');
+    typeContainer.innerHTML = '';
+    Object.entries(report.anomalies_by_type || {}).forEach(([type, count]) => {
+        const typeDiv = document.createElement('div');
+        typeDiv.className = 'flex justify-between items-center py-1';
+        typeDiv.innerHTML = `
+            <span class="text-sm text-gray-600">${type}</span>
+            <span class="text-sm font-medium text-gray-900">${count}</span>
+        `;
+        typeContainer.appendChild(typeDiv);
+    });
+    
+    // Update severity breakdown
+    const severityContainer = document.getElementById('anomalies-by-severity');
+    severityContainer.innerHTML = '';
+    Object.entries(report.anomalies_by_severity || {}).forEach(([severity, count]) => {
+        const severityDiv = document.createElement('div');
+        severityDiv.className = 'flex justify-between items-center py-1';
+        const color = getSeverityColor(severity);
+        severityDiv.innerHTML = `
+            <span class="text-sm text-gray-600">${severity}</span>
+            <span class="text-sm font-medium ${color.text}">${count}</span>
+        `;
+        severityContainer.appendChild(severityDiv);
+    });
+}
+
+function updateDetectedAnomaliesUI() {
+    const container = document.getElementById('detected-anomalies');
+    container.innerHTML = '';
+    
+    if (detectedAnomalies.length === 0) {
+        container.innerHTML = `
+            <div class="text-center text-white py-8">
+                <i class="fas fa-chart-area text-4xl text-gray-300 mb-2"></i>
+                <p>No anomalies detected</p>
+            </div>
+        `;
+        return;
+    }
+    
+    detectedAnomalies.slice(0, 10).forEach(anomaly => {
+        const anomalyDiv = document.createElement('div');
+        const severityColor = getSeverityColor(anomaly.severity);
+        anomalyDiv.className = `border-l-4 ${severityColor.border} bg-${severityColor.bg} p-4 rounded-lg`;
+        anomalyDiv.innerHTML = `
+            <div class="flex items-start justify-between">
+                <div class="flex-1">
+                    <h4 class="text-sm font-medium ${severityColor.text}">${anomaly.type} Anomaly</h4>
+                    <p class="text-sm text-gray-600 mt-1">${anomaly.description}</p>
+                    <div class="flex items-center mt-2 text-xs text-white">
+                        <span>Confidence: ${(anomaly.confidence * 100).toFixed(0)}%</span>
+                        <span class="mx-2">•</span>
+                        <span>Affected logs: ${anomaly.affected_logs.length}</span>
+                        <span class="mx-2">•</span>
+                        <span>${new Date(anomaly.timestamp).toLocaleString()}</span>
+                    </div>
+                </div>
+            </div>
+        `;
+        container.appendChild(anomalyDiv);
+    });
+}
+
+async function startAnomalyMonitoring() {
+    try {
+        const response = await fetch('/anomalies/start-monitoring', {
+            method: 'POST'
+        });
+        
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        
+        monitoringActive = true;
+        updateMonitoringButton();
+        showNotification('Anomaly monitoring started');
+    } catch (error) {
+        showNotification(`Failed to start monitoring: ${error.message}`, 'error');
+    }
+}
+
+async function stopAnomalyMonitoring() {
+    try {
+        const response = await fetch('/anomalies/stop-monitoring', {
+            method: 'POST'
+        });
+        
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        
+        monitoringActive = false;
+        updateMonitoringButton();
+        showNotification('Anomaly monitoring stopped');
+    } catch (error) {
+        showNotification(`Failed to stop monitoring: ${error.message}`, 'error');
+    }
+}
+
+async function updateAnomalyConfig() {
+    const config = {
+        enabled: true,
+        sensitivity: parseFloat(document.getElementById('sensitivity-slider').value),
+        time_window: parseInt(document.getElementById('time-window').value) * 60, // Convert to seconds
+        detection_methods: []
+    };
+    
+    if (document.getElementById('volume-detection').checked) {
+        config.detection_methods.push('volume');
+    }
+    if (document.getElementById('pattern-detection').checked) {
+        config.detection_methods.push('pattern');
+    }
+    
+    try {
+        const response = await fetch('/anomalies/config', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(config)
+        });
+        
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        
+        showNotification('Anomaly configuration updated successfully');
+        refreshAnomalies();
+    } catch (error) {
+        showNotification(`Failed to update configuration: ${error.message}`, 'error');
+    }
+}
+
+// Helper function to get current logs (implement based on your data source)
+async function getCurrentLogs() {
+    try {
+        console.log('Attempting to get current logs...');
+        
+        // Try to get logs from the database first
+        const response = await fetch('/database/query', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                query: "SELECT * FROM logs ORDER BY timestamp DESC LIMIT 1000"
+            })
+        });
+        
+        if (response.ok) {
+            const result = await response.json();
+            console.log(`Retrieved ${result.data?.length || 0} logs from database`);
+            return result.data || [];
+        }
+        
+        console.log('Database query failed, trying to get sample logs...');
+        
+        // Fallback: try to get logs from the logs endpoint
+        const logsResponse = await fetch('/logs/');
+        if (logsResponse.ok) {
+            const logs = await logsResponse.json();
+            console.log(`Retrieved ${logs.length || 0} logs from logs endpoint`);
+            return logs || [];
+        }
+        
+        console.log('No logs available from any source, returning sample data');
+        
+        // Final fallback: return sample data for demonstration
+        return generateSampleLogs();
+        
+    } catch (error) {
+        console.error('Error getting current logs:', error);
+        console.log('Returning sample data due to error');
+        return generateSampleLogs();
+    }
+}
+
+// Generate sample logs for demonstration when no real data is available
+function generateSampleLogs() {
+    const services = ['api', 'auth', 'database', 'worker', 'cache'];
+    const levels = ['INFO', 'WARN', 'ERROR', 'DEBUG'];
+    const sampleLogs = [];
+    
+    for (let i = 0; i < 100; i++) {
+        const timestamp = new Date(Date.now() - Math.random() * 24 * 60 * 60 * 1000).toISOString();
+        const service = services[Math.floor(Math.random() * services.length)];
+        const level = levels[Math.floor(Math.random() * levels.length)];
+        
+        sampleLogs.push({
+            timestamp: timestamp,
+            level: level,
+            service: service,
+            message: `Sample ${level.toLowerCase()} message from ${service} service`,
+            producer_id: `${service}-${Math.floor(Math.random() * 1000)}`
+        });
+    }
+    
+    console.log(`Generated ${sampleLogs.length} sample logs`);
+    return sampleLogs;
+}
+
+// Update sensitivity value display
+document.addEventListener('DOMContentLoaded', function() {
+    const sensitivitySlider = document.getElementById('sensitivity-slider');
+    if (sensitivitySlider) {
+        sensitivitySlider.addEventListener('input', function() {
+            document.getElementById('sensitivity-value').textContent = this.value;
+        });
+    }
+});
+
+// Auto-refresh dashboard and alerts periodically
+function startAutoRefresh() {
+    // Refresh dashboard every 30 seconds if active
+    setInterval(() => {
+        const dashboardTab = document.getElementById('dashboard-tab');
+        if (dashboardTab && !dashboardTab.classList.contains('hidden')) {
+            refreshDashboard();
+        }
+    }, 30000);
+    
+    // Refresh alerts every 60 seconds if active
+    setInterval(() => {
+        const alertsTab = document.getElementById('alerts-tab');
+        if (alertsTab && !alertsTab.classList.contains('hidden')) {
+            refreshAlerts();
+        }
+    }, 60000);
+}
+
+// Start auto-refresh when page loads
+document.addEventListener('DOMContentLoaded', function() {
+    startAutoRefresh();
 });
