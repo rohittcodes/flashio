@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException, Request, Header
+from fastapi import APIRouter, Depends, HTTPException, Request
 from typing import Dict, Any, Optional, List
 from pydantic import BaseModel, Field
 from datetime import datetime
@@ -8,36 +8,9 @@ import os
 # Import our agent
 from llm.agent import LogAnalysisAgent
 from storage.chroma_client import ChromaLogStore
-from utils.encryption import CredentialManager
 
 # Create router
 router = APIRouter(prefix="/queries", tags=["queries"])
-
-# Initialize credential manager for API key validation
-credential_manager = CredentialManager()
-
-async def verify_api_key(x_api_key: str = Header(...)):
-    """Verify API key middleware for queries"""
-    expected_key_hash = os.getenv('API_KEY_HASH')
-    if not expected_key_hash:
-        raise HTTPException(status_code=500, detail="API key not configured")
-    
-    if credential_manager.hash_api_key(x_api_key) != expected_key_hash:
-        raise HTTPException(status_code=401, detail="Invalid API key")
-    return x_api_key
-
-async def verify_api_key_optional(x_api_key: str = Header(None)):
-    """Optional API key verification for read-only endpoints"""
-    if x_api_key is None:
-        return None  # Allow access without API key
-    
-    expected_key_hash = os.getenv('API_KEY_HASH')
-    if not expected_key_hash:
-        return None  # If no API key is configured, allow access
-    
-    if credential_manager.hash_api_key(x_api_key) != expected_key_hash:
-        raise HTTPException(status_code=401, detail="Invalid API key")
-    return x_api_key
 
 # Enhanced models for request/response
 class NaturalLanguageQuery(BaseModel):
@@ -134,8 +107,7 @@ async def reinitialize_agent():
 @router.post("/", response_model=QueryResponse)
 async def query_logs(
     request: NaturalLanguageQuery,
-    agent: LogAnalysisAgent = Depends(get_agent),
-    api_key: str = Depends(verify_api_key)
+    agent: LogAnalysisAgent = Depends(get_agent)
 ):
     """Query logs using natural language with context awareness"""
     try:
@@ -173,8 +145,7 @@ async def query_logs(
 
 @router.get("/insights", response_model=SystemInsight)
 async def get_system_insights(
-    agent: LogAnalysisAgent = Depends(get_agent),
-    api_key: str = Depends(verify_api_key_optional)
+    agent: LogAnalysisAgent = Depends(get_agent)
 ):
     """Get accumulated system insights and patterns"""
     try:
@@ -186,7 +157,7 @@ async def get_system_insights(
         raise HTTPException(status_code=500, detail=f"Error retrieving insights: {str(e)}")
 
 @router.post("/reinitialize")
-async def reset_and_initialize(api_key: str = Depends(verify_api_key)):
+async def reset_and_initialize():
     """Force the agent to reinitialize with fresh data"""
     try:
         agent = await reinitialize_agent()
@@ -198,8 +169,7 @@ async def reset_and_initialize(api_key: str = Depends(verify_api_key)):
 async def summarize_logs(
     logs: List[Dict[str, Any]],
     focus: Optional[str] = None,
-    agent: LogAnalysisAgent = Depends(get_agent),
-    api_key: str = Depends(verify_api_key)
+    agent: LogAnalysisAgent = Depends(get_agent)
 ):
     """Generate a focused summary of provided logs"""
     try:
@@ -211,8 +181,7 @@ async def summarize_logs(
 @router.post("/set-model", response_model=dict)
 async def set_model(
     config: ModelConfig,
-    agent: LogAnalysisAgent = Depends(get_agent),
-    api_key: str = Depends(verify_api_key)
+    agent: LogAnalysisAgent = Depends(get_agent)
 ):
     """Set the LLM model for the agent"""
     try:
@@ -246,8 +215,7 @@ async def set_model(
 
 @router.get("/current-model")
 async def get_current_model(
-    agent: LogAnalysisAgent = Depends(get_agent),
-    api_key: str = Depends(verify_api_key_optional)
+    agent: LogAnalysisAgent = Depends(get_agent)
 ):
     """Get the current LLM model configuration"""
     try:

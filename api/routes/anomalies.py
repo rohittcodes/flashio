@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException, Header, BackgroundTasks
+from fastapi import APIRouter, Depends, HTTPException, BackgroundTasks
 from typing import Dict, Any, Optional, List
 from pydantic import BaseModel, Field
 from datetime import datetime, timedelta
@@ -7,11 +7,9 @@ import os
 import asyncio
 import numpy as np
 from collections import defaultdict, Counter
-from utils.encryption import CredentialManager
 from storage.chroma_client import ChromaLogStore
 
 router = APIRouter(prefix="/anomalies", tags=["anomalies"])
-credential_manager = CredentialManager()
 
 # Anomaly models
 class AnomalyConfig(BaseModel):
@@ -44,29 +42,6 @@ class AnomalyReport(BaseModel):
     system_health_score: float
 
 # API key validation
-async def verify_api_key(x_api_key: str = Header(...)):
-    """Verify API key middleware"""
-    expected_key_hash = os.getenv('API_KEY_HASH')
-    if not expected_key_hash:
-        raise HTTPException(status_code=500, detail="API key not configured")
-    
-    if credential_manager.hash_api_key(x_api_key) != expected_key_hash:
-        raise HTTPException(status_code=401, detail="Invalid API key")
-    return x_api_key
-
-async def verify_api_key_optional(x_api_key: str = Header(None)):
-    """Optional API key verification for read-only endpoints"""
-    if x_api_key is None:
-        return None  # Allow access without API key
-    
-    expected_key_hash = os.getenv('API_KEY_HASH')
-    if not expected_key_hash:
-        return None  # If no API key is configured, allow access
-    
-    if credential_manager.hash_api_key(x_api_key) != expected_key_hash:
-        raise HTTPException(status_code=401, detail="Invalid API key")
-    return x_api_key
-
 # Global configuration and storage
 anomaly_config = AnomalyConfig()
 detected_anomalies: Dict[str, Anomaly] = {}
@@ -262,8 +237,7 @@ detector = AnomalyDetector(anomaly_config)
 
 @router.post("/config")
 async def update_anomaly_config(
-    config: AnomalyConfig,
-    api_key: str = Depends(verify_api_key)
+    config: AnomalyConfig
 ):
     """Update anomaly detection configuration"""
     try:
@@ -276,15 +250,14 @@ async def update_anomaly_config(
         raise HTTPException(status_code=500, detail=f"Failed to update config: {str(e)}")
 
 @router.get("/config")
-async def get_anomaly_config(api_key: str = Depends(verify_api_key_optional)):
+async def get_anomaly_config():
     """Get current anomaly detection configuration"""
     return anomaly_config.dict()
 
 @router.post("/analyze")
 async def analyze_logs_for_anomalies(
     logs: List[Dict[str, Any]],
-    update_baseline: bool = False,
-    api_key: str = Depends(verify_api_key)
+    update_baseline: bool = False
 ):
     """Analyze logs for anomalies"""
     try:
@@ -311,8 +284,7 @@ async def analyze_logs_for_anomalies(
 async def get_detected_anomalies(
     severity: Optional[str] = None,
     anomaly_type: Optional[str] = None,
-    limit: int = 50,
-    api_key: str = Depends(verify_api_key_optional)
+    limit: int = 50
 ):
     """Get detected anomalies with optional filtering"""
     try:
@@ -332,7 +304,7 @@ async def get_detected_anomalies(
         raise HTTPException(status_code=500, detail=f"Failed to get anomalies: {str(e)}")
 
 @router.get("/report", response_model=AnomalyReport)
-async def get_anomaly_report(api_key: str = Depends(verify_api_key_optional)):
+async def get_anomaly_report():
     """Get comprehensive anomaly report"""
     try:
         anomalies = list(detected_anomalies.values())
@@ -378,8 +350,7 @@ async def get_anomaly_report(api_key: str = Depends(verify_api_key_optional)):
 
 @router.post("/start-monitoring")
 async def start_real_time_monitoring(
-    background_tasks: BackgroundTasks,
-    api_key: str = Depends(verify_api_key)
+    background_tasks: BackgroundTasks
 ):
     """Start real-time anomaly monitoring"""
     global real_time_monitoring
@@ -394,14 +365,14 @@ async def start_real_time_monitoring(
     return {"message": "Real-time anomaly monitoring started"}
 
 @router.post("/stop-monitoring")
-async def stop_real_time_monitoring(api_key: str = Depends(verify_api_key)):
+async def stop_real_time_monitoring():
     """Stop real-time anomaly monitoring"""
     global real_time_monitoring
     real_time_monitoring = False
     return {"message": "Real-time anomaly monitoring stopped"}
 
 @router.get("/monitoring-status")
-async def get_monitoring_status(api_key: str = Depends(verify_api_key_optional)):
+async def get_monitoring_status():
     """Get real-time monitoring status"""
     return {
         "monitoring_active": real_time_monitoring,
@@ -411,8 +382,7 @@ async def get_monitoring_status(api_key: str = Depends(verify_api_key_optional))
 
 @router.delete("/clear")
 async def clear_anomalies(
-    older_than_hours: int = 24,
-    api_key: str = Depends(verify_api_key)
+    older_than_hours: int = 24
 ):
     """Clear old anomalies"""
     try:

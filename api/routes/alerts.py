@@ -1,15 +1,13 @@
-from fastapi import APIRouter, Depends, HTTPException, Header
+from fastapi import APIRouter, Depends, HTTPException
 from typing import Dict, Any, Optional, List
 from pydantic import BaseModel, Field
 from datetime import datetime, timedelta
 import json
 import os
 import asyncio
-from utils.encryption import CredentialManager
 from storage.chroma_client import ChromaLogStore
 
 router = APIRouter(prefix="/alerts", tags=["alerts"])
-credential_manager = CredentialManager()
 
 # Alert models
 class AlertRule(BaseModel):
@@ -40,37 +38,13 @@ class AlertSummary(BaseModel):
     recent_alerts: List[Alert]
 
 # API key validation
-async def verify_api_key(x_api_key: str = Header(...)):
-    """Verify API key middleware"""
-    expected_key_hash = os.getenv('API_KEY_HASH')
-    if not expected_key_hash:
-        raise HTTPException(status_code=500, detail="API key not configured")
-    
-    if credential_manager.hash_api_key(x_api_key) != expected_key_hash:
-        raise HTTPException(status_code=401, detail="Invalid API key")
-    return x_api_key
-
-async def verify_api_key_optional(x_api_key: str = Header(None)):
-    """Optional API key verification for read-only endpoints"""
-    if x_api_key is None:
-        return None  # Allow access without API key
-    
-    expected_key_hash = os.getenv('API_KEY_HASH')
-    if not expected_key_hash:
-        return None  # If no API key is configured, allow access
-    
-    if credential_manager.hash_api_key(x_api_key) != expected_key_hash:
-        raise HTTPException(status_code=401, detail="Invalid API key")
-    return x_api_key
-
 # In-memory storage for demonstration (use database in production)
 alert_rules: Dict[str, AlertRule] = {}
 active_alerts: Dict[str, Alert] = {}
 
 @router.post("/rules", response_model=Dict[str, str])
 async def create_alert_rule(
-    rule: AlertRule,
-    api_key: str = Depends(verify_api_key)
+    rule: AlertRule
 ):
     """Create a new alert rule"""
     try:
@@ -85,7 +59,7 @@ async def create_alert_rule(
         raise HTTPException(status_code=500, detail=f"Failed to create alert rule: {str(e)}")
 
 @router.get("/rules", response_model=List[Dict[str, Any]])
-async def get_alert_rules(api_key: str = Depends(verify_api_key_optional)):
+async def get_alert_rules():
     """Get all alert rules"""
     try:
         return [
@@ -97,8 +71,7 @@ async def get_alert_rules(api_key: str = Depends(verify_api_key_optional)):
 
 @router.delete("/rules/{rule_id}")
 async def delete_alert_rule(
-    rule_id: str,
-    api_key: str = Depends(verify_api_key)
+    rule_id: str
 ):
     """Delete an alert rule"""
     try:
@@ -114,8 +87,7 @@ async def delete_alert_rule(
 
 @router.post("/check")
 async def check_alerts_manually(
-    logs: List[Dict[str, Any]],
-    api_key: str = Depends(verify_api_key)
+    logs: List[Dict[str, Any]]
 ):
     """Manually check logs against alert rules"""
     try:
@@ -157,8 +129,7 @@ async def check_alerts_manually(
 
 @router.get("/active", response_model=List[Alert])
 async def get_active_alerts(
-    severity: Optional[str] = None,
-    api_key: str = Depends(verify_api_key_optional)
+    severity: Optional[str] = None
 ):
     """Get active alerts, optionally filtered by severity"""
     try:
@@ -176,8 +147,7 @@ async def get_active_alerts(
 
 @router.post("/acknowledge/{alert_id}")
 async def acknowledge_alert(
-    alert_id: str,
-    api_key: str = Depends(verify_api_key)
+    alert_id: str
 ):
     """Acknowledge an alert"""
     try:
@@ -192,7 +162,7 @@ async def acknowledge_alert(
         raise HTTPException(status_code=500, detail=f"Failed to acknowledge alert: {str(e)}")
 
 @router.get("/summary", response_model=AlertSummary)
-async def get_alert_summary(api_key: str = Depends(verify_api_key_optional)):
+async def get_alert_summary():
     """Get alert summary and statistics"""
     try:
         alerts = list(active_alerts.values())
@@ -224,7 +194,7 @@ async def get_alert_summary(api_key: str = Depends(verify_api_key_optional)):
         raise HTTPException(status_code=500, detail=f"Failed to get alert summary: {str(e)}")
 
 @router.delete("/clear")
-async def clear_acknowledged_alerts(api_key: str = Depends(verify_api_key)):
+async def clear_acknowledged_alerts():
     """Clear all acknowledged alerts"""
     try:
         before_count = len(active_alerts)

@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException, Header
+from fastapi import APIRouter, Depends, HTTPException
 from typing import Dict, Any, Optional, List
 from pydantic import BaseModel, Field
 from datetime import datetime, timedelta
@@ -6,10 +6,8 @@ import json
 import os
 from collections import defaultdict, Counter
 import statistics
-from utils.encryption import CredentialManager
 
 router = APIRouter(prefix="/metrics", tags=["metrics"])
-credential_manager = CredentialManager()
 
 # Metrics models
 class SystemMetrics(BaseModel):
@@ -51,17 +49,6 @@ class DashboardData(BaseModel):
     top_errors: List[Dict[str, Any]]
     service_status: List[Dict[str, Any]]
     real_time_stats: Dict[str, Any]
-
-# API key validation
-async def verify_api_key(x_api_key: str = Header(...)):
-    """Verify API key middleware"""
-    expected_key_hash = os.getenv('API_KEY_HASH')
-    if not expected_key_hash:
-        raise HTTPException(status_code=500, detail="API key not configured")
-    
-    if credential_manager.hash_api_key(x_api_key) != expected_key_hash:
-        raise HTTPException(status_code=401, detail="Invalid API key")
-    return x_api_key
 
 class MetricsCalculator:
     """Advanced metrics calculation engine"""
@@ -416,8 +403,7 @@ calculator = MetricsCalculator()
 @router.post("/system", response_model=SystemMetrics)
 async def get_system_metrics(
     logs: List[Dict[str, Any]],
-    time_window: int = 3600,
-    api_key: str = Depends(verify_api_key)
+    time_window: int = 3600
 ):
     """Calculate current system metrics"""
     try:
@@ -429,8 +415,7 @@ async def get_system_metrics(
 
 @router.post("/services", response_model=List[ServiceMetrics])
 async def get_service_metrics(
-    logs: List[Dict[str, Any]],
-    api_key: str = Depends(verify_api_key)
+    logs: List[Dict[str, Any]]
 ):
     """Calculate metrics for each service"""
     try:
@@ -443,8 +428,7 @@ async def get_service_metrics(
 @router.post("/performance", response_model=PerformanceMetrics)
 async def get_performance_metrics(
     logs: List[Dict[str, Any]],
-    time_range_hours: int = 24,
-    api_key: str = Depends(verify_api_key)
+    time_range_hours: int = 24
 ):
     """Calculate performance metrics over time"""
     try:
@@ -456,8 +440,7 @@ async def get_performance_metrics(
 
 @router.post("/dashboard", response_model=DashboardData)
 async def get_dashboard_data(
-    logs: List[Dict[str, Any]],
-    api_key: str = Depends(verify_api_key)
+    logs: List[Dict[str, Any]]
 ):
     """Get comprehensive dashboard data"""
     try:
@@ -468,7 +451,7 @@ async def get_dashboard_data(
         raise HTTPException(status_code=500, detail=f"Failed to generate dashboard data: {str(e)}")
 
 @router.get("/health")
-async def system_health_check(api_key: str = Depends(verify_api_key)):
+async def system_health_check():
     """Quick system health check"""
     try:
         # This would typically check various system components
@@ -491,8 +474,7 @@ async def system_health_check(api_key: str = Depends(verify_api_key)):
 @router.post("/trends")
 async def analyze_trends(
     logs: List[Dict[str, Any]],
-    time_bucket: str = "hour",  # hour, day, week
-    api_key: str = Depends(verify_api_key)
+    time_bucket: str = "hour"  # hour, day, week
 ):
     """Analyze trends in log data"""
     try:

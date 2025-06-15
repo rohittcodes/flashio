@@ -1,16 +1,14 @@
-from fastapi import APIRouter, Depends, HTTPException, Header
+from fastapi import APIRouter, Depends, HTTPException
 from typing import Dict, Any, Optional, List, Tuple
 from pydantic import BaseModel, Field
 from datetime import datetime, timedelta
 import json
 import os
 from collections import defaultdict
-from utils.encryption import CredentialManager
 from storage.chroma_client import ChromaLogStore
 import uuid
 
 router = APIRouter(prefix="/correlation", tags=["correlation"])
-credential_manager = CredentialManager()
 
 # Correlation models
 class CorrelationRequest(BaseModel):
@@ -48,16 +46,6 @@ class ServiceFlow(BaseModel):
     warnings: List[Dict[str, Any]]
 
 # API key validation
-async def verify_api_key(x_api_key: str = Header(...)):
-    """Verify API key middleware"""
-    expected_key_hash = os.getenv('API_KEY_HASH')
-    if not expected_key_hash:
-        raise HTTPException(status_code=500, detail="API key not configured")
-    
-    if credential_manager.hash_api_key(x_api_key) != expected_key_hash:
-        raise HTTPException(status_code=401, detail="Invalid API key")
-    return x_api_key
-
 class LogCorrelator:
     """Advanced log correlation engine"""
     
@@ -327,8 +315,7 @@ correlator = LogCorrelator()
 
 @router.post("/analyze", response_model=CorrelationSummary)
 async def correlate_logs(
-    request: CorrelationRequest,
-    api_key: str = Depends(verify_api_key)
+    request: CorrelationRequest
 ):
     """Analyze logs for correlations"""
     try:
@@ -385,8 +372,7 @@ async def correlate_logs(
 
 @router.post("/trace-flows", response_model=List[ServiceFlow])
 async def trace_service_flows(
-    logs: List[Dict[str, Any]],
-    api_key: str = Depends(verify_api_key)
+    logs: List[Dict[str, Any]]
 ):
     """Trace request flows across services"""
     try:
@@ -405,8 +391,7 @@ async def find_related_logs(
     primary_log: Dict[str, Any],
     candidate_logs: List[Dict[str, Any]],
     correlation_fields: List[str] = ["service", "user_id", "request_id"],
-    time_window: int = 300,
-    api_key: str = Depends(verify_api_key)
+    time_window: int = 300
 ):
     """Find logs related to a specific primary log"""
     try:
@@ -474,8 +459,7 @@ async def find_related_logs(
 @router.post("/detect-chains")
 async def detect_error_chains(
     logs: List[Dict[str, Any]],
-    max_chain_length: int = 10,
-    api_key: str = Depends(verify_api_key)
+    max_chain_length: int = 10
 ):
     """Detect chains of related errors or events"""
     try:

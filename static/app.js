@@ -187,13 +187,11 @@ document.getElementById('query-form').addEventListener('submit', async function(
     querySpinner.classList.remove('hidden');
     queryText.textContent = 'Analyzing...';
     
-    resultsDiv.innerHTML = '<div class="text-center py-6"><div class="inline-block animate-spin h-8 w-8 border-4 border-indigo-500 border-t-transparent rounded-full"></div><p class="mt-2 text-gray-600">AI is analyzing your query...</p></div>';
-    
-    try {
+    resultsDiv.innerHTML = '<div class="text-center py-6"><div class="inline-block animate-spin h-8 w-8 border-4 border-indigo-500 border-t-transparent rounded-full"></div><p class="mt-2 text-gray-600">AI is analyzing your query...</p></div>';    try {
         const response = await fetch('/queries/', {
             method: 'POST',
             headers: {
-                'Content-Type': 'application/json',
+                'Content-Type': 'application/json'
             },
             body: JSON.stringify({
                 query: query,
@@ -627,12 +625,10 @@ async function switchModel(provider, model) {
             </svg>
             Switching...
         `;
-        button.disabled = true;
-        
-        const response = await fetch('/queries/set-model', {
+        button.disabled = true;        const response = await fetch('/queries/set-model', {
             method: 'POST',
             headers: {
-                'Content-Type': 'application/json',
+                'Content-Type': 'application/json'
             },
             body: JSON.stringify({
                 model_id: model,
@@ -726,8 +722,7 @@ function getModelDisplayName(provider, model) {
 async function refreshAgentState() {
     if (isAgentStateRefreshing) return;
     
-    try {
-        isAgentStateRefreshing = true;
+    try {        isAgentStateRefreshing = true;
         updateAgentStateIndicator('refreshing');
         
         const response = await fetch('/queries/insights');
@@ -1845,9 +1840,7 @@ async function refreshDashboard() {
             return;
         }
 
-        console.log(`Found ${logs.length} logs for dashboard`);
-        
-        const response = await fetch('/metrics/dashboard', {
+        console.log(`Found ${logs.length} logs for dashboard`);        const response = await fetch('/metrics/dashboard', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'

@@ -1,10 +1,12 @@
-from fastapi import APIRouter, HTTPException, Depends, Header
+from fastapi import APIRouter, HTTPException, Depends
 from typing import Dict, Optional
 from pydantic import BaseModel, Field
-from utils.encryption import CredentialManager
 import os
+from utils.encryption import CredentialManager
 
 router = APIRouter(prefix="/credentials", tags=["credentials"])
+
+# Initialize credential manager
 credential_manager = CredentialManager()
 
 # Define request/response models
@@ -14,20 +16,9 @@ class AWSCredentials(BaseModel):
     region_name: str = Field(..., description="AWS Region")
     log_group_name: str = Field(..., description="CloudWatch Log Group Name")
 
-async def verify_api_key(x_api_key: str = Header(...)):
-    """Verify API key middleware"""
-    expected_key_hash = os.getenv('API_KEY_HASH')
-    if not expected_key_hash:
-        raise HTTPException(status_code=500, detail="API key not configured")
-    
-    if credential_manager.hash_api_key(x_api_key) != expected_key_hash:
-        raise HTTPException(status_code=401, detail="Invalid API key")
-    return x_api_key
-
 @router.post("/aws")
 async def store_aws_credentials(
-    credentials: AWSCredentials,
-    api_key: str = Depends(verify_api_key)
+    credentials: AWSCredentials
 ) -> Dict[str, str]:
     """Store encrypted AWS credentials"""
     try:
@@ -43,9 +34,7 @@ async def store_aws_credentials(
         raise HTTPException(status_code=500, detail=f"Failed to store credentials: {str(e)}")
 
 @router.get("/aws/test")
-async def test_aws_connection(
-    api_key: str = Depends(verify_api_key)
-) -> Dict[str, str]:
+async def test_aws_connection() -> Dict[str, str]:
     """Test AWS CloudWatch connection with stored credentials"""
     try:
         # Get encrypted credentials
